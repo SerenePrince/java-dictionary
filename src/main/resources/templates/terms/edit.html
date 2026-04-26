@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::content})}">
+<body>
+
+<div th:fragment="content">
+
+    <!-- Back -->
+    <div class="mb-4">
+        <a th:href="@{/terms/{id}(id=${term.id})}" class="back-link">← Back to Term</a>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Edit Term</h1>
+        <p class="subtitle" th:text="'Editing: ' + ${term.name}">Editing term</p>
+    </div>
+
+    <!-- Form -->
+    <form th:action="@{/terms/{id}/edit(id=${term.id})}"
+          th:object="${term}"
+          method="post">
+
+        <!-- Basic Info -->
+        <div class="form-section">
+            <h6 class="mb-4">Basic Information</h6>
+
+            <div class="mb-4">
+                <label class="form-label">Term Name</label>
+                <input type="text"
+                       name="name"
+                       class="form-control"
+                       th:value="${term.name}"
+                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('name')}"
+                     th:errors="*{name}">
+                </div>
+            </div>
+
+            <div class="mb-0">
+                <label class="form-label">Experience Level</label>
+                <select name="experienceLevel"
+                        class="form-select"
+                        th:classappend="${#fields.hasErrors('experienceLevel')} ? 'is-invalid'">
+                    <option value="">Select a level...</option>
+                    <option th:each="level : ${experienceLevels}"
+                            th:value="${level}"
+                            th:text="${level.displayName}"
+                            th:selected="${level == term.experienceLevel}">
+                    </option>
+                </select>
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('experienceLevel')}"
+                     th:errors="*{experienceLevel}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Definitions -->
+        <div class="form-section">
+            <h6 class="mb-4">Definitions</h6>
+
+            <div class="mb-4">
+                <label class="form-label">Casual Definition</label>
+                <textarea name="casualDefinition"
+                          class="form-control"
+                          rows="4"
+                          th:text="${term.casualDefinition}"
+                          th:classappend="${#fields.hasErrors('casualDefinition')} ? 'is-invalid'">
+                </textarea>
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('casualDefinition')}"
+                     th:errors="*{casualDefinition}">
+                </div>
+            </div>
+
+            <div class="mb-0">
+                <label class="form-label">Formal Definition</label>
+                <textarea name="formalDefinition"
+                          class="form-control"
+                          rows="4"
+                          th:text="${term.formalDefinition}"
+                          th:classappend="${#fields.hasErrors('formalDefinition')} ? 'is-invalid'">
+                </textarea>
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('formalDefinition')}"
+                     th:errors="*{formalDefinition}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-section">
+            <h6 class="mb-4">Tags</h6>
+
+            <div class="mb-2">
+                <label class="form-label">Tags</label>
+                <input type="text"
+                       id="tagsInput"
+                       class="form-control"
+                       th:value="${#strings.listJoin(term.tags, ', ')}"
+                       th:classappend="${#fields.hasErrors('tags')} ? 'is-invalid'"
+                       placeholder="e.g. OOP, inheritance, polymorphism">
+                <p class="form-text">Separate tags with commas.</p>
+            </div>
+
+            <div id="tagPreview" class="mt-2">
+                <span th:each="tag : ${term.tags}"
+                      class="badge me-1 mb-1"
+                      th:text="${tag}">
+                </span>
+            </div>
+
+            <div id="tagInputs">
+                <input th:each="tag : ${term.tags}"
+                       type="hidden"
+                       name="tags"
+                       th:value="${tag}">
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2 pt-2">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a th:href="@{/terms/{id}(id=${term.id})}"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

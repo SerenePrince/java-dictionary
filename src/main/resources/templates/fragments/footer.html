@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<footer th:fragment="footer">
+
+    <div class="container">
+
+        <div class="row g-4">
+
+            <!-- Brand -->
+            <div class="col-md-4">
+                <h6>Java Dictionary</h6>
+                <p class="text-muted" style="font-size: 0.875rem; margin: 0;">
+                    Personal Java interview prep tool.
+                </p>
+            </div>
+
+            <!-- Links -->
+            <div class="col-md-4">
+                <h6>Navigate</h6>
+                <ul class="list-unstyled mb-0" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <li>
+                        <a th:href="@{/terms}">Terms</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/terms/create}">Add Term</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="col-md-4">
+                <h6>Contact</h6>
+                <ul class="list-unstyled mb-0" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <li>
+                        <a href="mailto:noahparknguyen@gmail.com">Email</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/SerenePrince" target="_blank">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <p class="copyright">© 2025 Java Dictionary</p>
+
+    </div>
+
+</footer>
+
+</body>
+</html>

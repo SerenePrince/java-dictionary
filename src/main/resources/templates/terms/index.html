@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::content})}">
+<body>
+
+<div th:fragment="content">
+
+    <!-- Header -->
+    <div class="page-header d-flex justify-content-between align-items-start">
+        <div>
+            <h1>Java Dictionary</h1>
+            <p class="subtitle">Your personal Java interview prep tool.</p>
+        </div>
+        <a th:href="@{/terms/create}" class="btn btn-primary">Add Term</a>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-panel mb-5">
+        <form th:action="@{/terms}" method="get">
+            <div class="row g-3 align-items-end">
+
+                <!-- Search -->
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Search</label>
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search terms..."
+                           th:value="${search}">
+                </div>
+
+                <!-- Experience Level -->
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Level</label>
+                    <select name="experienceLevel" class="form-select">
+                        <option value="">All Levels</option>
+                        <option th:each="level : ${experienceLevels}"
+                                th:value="${level}"
+                                th:text="${level.displayName}"
+                                th:selected="${level == selectedLevel}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Submit -->
+                <div class="col-12 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Count -->
+    <p class="results-count"
+       th:text="${#lists.size(terms)} + ' terms'">
+        0 terms
+    </p>
+
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(terms)}" class="empty-state">
+        <h5>No terms found.</h5>
+        <p>Try adjusting your filters, or add a new term to get started.</p>
+        <a th:href="@{/terms/create}" class="btn btn-primary mt-3">Add Term</a>
+    </div>
+
+    <!-- Terms Grid -->
+    <div th:unless="${#lists.isEmpty(terms)}" class="row g-3">
+        <div th:each="term : ${terms}" class="col-12 col-md-6 col-lg-4">
+
+            <div class="term-card h-100">
+
+                <!-- Level Badge -->
+                <div class="mb-2">
+                    <span class="badge"
+                          th:text="${term.experienceLevel.displayName}">
+                    </span>
+                </div>
+
+                <!-- Title -->
+                <p class="term-name" th:text="${term.name}">Term Name</p>
+
+                <!-- Definition -->
+                <p class="term-definition" th:text="${term.casualDefinition}">
+                    Casual definition
+                </p>
+
+                <!-- Tags -->
+                <div class="mb-3" th:unless="${#sets.isEmpty(term.tags)}">
+                    <span th:each="tag : ${term.tags}"
+                          class="badge me-1 mb-1"
+                          th:text="${tag}">
+                    </span>
+                </div>
+
+                <!-- Link -->
+                <a th:href="@{/terms/{id}(id=${term.id})}"
+                   class="term-link mt-auto">
+                    Read →
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

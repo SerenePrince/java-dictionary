@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::content})}">
+<body>
+
+<div th:fragment="content">
+
+    <!-- Back -->
+    <div class="mb-4">
+        <a th:href="@{/terms}" class="back-link">← All Terms</a>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header d-flex justify-content-between align-items-start">
+        <div>
+            <span class="badge mb-3"
+                  th:text="${term.experienceLevel.displayName}">
+            </span>
+            <h1 th:text="${term.name}">Term Name</h1>
+        </div>
+
+        <div class="d-flex gap-2 mt-1">
+            <a th:href="@{/terms/{id}/edit(id=${term.id})}"
+               class="btn btn-outline-primary btn-sm">
+                Edit
+            </a>
+            <form th:action="@{/terms/{id}/delete(id=${term.id})}"
+                  method="post"
+                  onsubmit="return confirm('Delete this term?')">
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Definitions -->
+    <div>
+
+        <div class="definition-block">
+            <p class="definition-label">Casual Definition</p>
+            <p class="definition-text" th:text="${term.casualDefinition}">
+                Casual definition
+            </p>
+        </div>
+
+        <div class="definition-block">
+            <p class="definition-label">Formal Definition</p>
+            <p class="definition-text" th:text="${term.formalDefinition}">
+                Formal definition
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Tags -->
+    <div th:unless="${#sets.isEmpty(term.tags)}" class="mt-4">
+        <p class="definition-label mb-2">Tags</p>
+        <div>
+            <span th:each="tag : ${term.tags}"
+                  class="badge me-1 mb-1"
+                  th:text="${tag}">
+            </span>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
