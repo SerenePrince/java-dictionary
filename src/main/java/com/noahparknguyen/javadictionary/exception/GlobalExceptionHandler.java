@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleEnumMismatch(MethodArgumentTypeMismatchException ex) {
-        log.warn("Invalid parameter value - param: '{}', value: '{}'", ex.getName(), ex.getValue());
+        log.warn("Invalid parameter - param: '{}', value: '{}'", ex.getName(), ex.getValue());
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'",
@@ -31,13 +31,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationErrors(MethodArgumentNotValidException ex) {
-        log.warn("Validation failed: {}", ex.getBindingResult().getFieldErrors());
         Map<String, String> errors = new HashMap<>();
-
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
-
+        log.warn("Validation failed - fields: {}", errors);
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation failed",
@@ -58,10 +56,22 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(DuplicateResourceException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDuplicate(DuplicateResourceException ex) {
+        log.warn("Duplicate resource: {}", ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                null,
+                LocalDateTime.now()
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleGenericException(Exception ex) {
-        log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
         return new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "An unexpected error occurred",
@@ -69,5 +79,4 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
     }
-
 }
