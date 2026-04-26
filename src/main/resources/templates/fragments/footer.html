@@ -44,7 +44,10 @@
 
         </div>
 
-        <p class="copyright">© 2025 Java Dictionary</p>
+        <!-- Dynamic copyright year -->
+        <p class="copyright"
+           th:text="'© ' + ${#temporals.year(#temporals.createNow())} + ' Java Dictionary'">
+        </p>
 
     </div>
 
