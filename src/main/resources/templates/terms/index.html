@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::content})}">
+<html lang="en" th:replace="~{layout/base :: layout(~{::content})}"
+      xmlns:th="http://www.thymeleaf.org">
 <body>
 
 <div th:fragment="content">
@@ -11,40 +11,54 @@
             <h1>Java Dictionary</h1>
             <p class="subtitle">Your personal Java interview prep tool.</p>
         </div>
-        <a th:href="@{/terms/create}" class="btn btn-primary">Add Term</a>
+        <a class="btn btn-primary" th:href="@{/terms/create}">Add Term</a>
     </div>
 
     <!-- Filters -->
     <div class="filter-panel mb-5">
-        <form th:action="@{/terms}" method="get">
+        <form method="get" th:action="@{/terms}">
             <div class="row g-3 align-items-end">
 
                 <!-- Search -->
-                <div class="col-12 col-md-6">
-                    <label class="form-label">Search</label>
-                    <input type="text"
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="search">Search</label>
+                    <input class="form-control"
+                           id="search"
                            name="search"
-                           class="form-control"
                            placeholder="Search terms..."
-                           th:value="${search}">
+                           th:value="${search}"
+                           type="text">
                 </div>
 
                 <!-- Experience Level -->
-                <div class="col-12 col-md-4">
-                    <label class="form-label">Level</label>
-                    <select name="experienceLevel" class="form-select">
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="experienceLevel">Level</label>
+                    <select class="form-select"
+                            id="experienceLevel"
+                            name="experienceLevel">
                         <option value="">All Levels</option>
                         <option th:each="level : ${experienceLevels}"
-                                th:value="${level}"
+                                th:selected="${level == selectedLevel}"
                                 th:text="${level.displayName}"
-                                th:selected="${level == selectedLevel}">
+                                th:value="${level}">
                         </option>
                     </select>
                 </div>
 
+                <!-- Tag Filter -->
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="tag">Tag</label>
+                    <input class="form-control"
+                           id="tag"
+                           name="tag"
+                           placeholder="Filter by tag..."
+                           th:value="${tag}"
+                           type="text">
+                </div>
+
                 <!-- Submit -->
                 <div class="col-12 col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <button class="btn btn-primary w-100" type="submit">Filter</button>
                 </div>
 
             </div>
@@ -58,15 +72,15 @@
     </p>
 
     <!-- Empty State -->
-    <div th:if="${#lists.isEmpty(terms)}" class="empty-state">
+    <div class="empty-state" th:if="${#lists.isEmpty(terms)}">
         <h5>No terms found.</h5>
         <p>Try adjusting your filters, or add a new term to get started.</p>
-        <a th:href="@{/terms/create}" class="btn btn-primary mt-3">Add Term</a>
+        <a class="btn btn-primary mt-3" th:href="@{/terms/create}">Add Term</a>
     </div>
 
     <!-- Terms Grid -->
-    <div th:unless="${#lists.isEmpty(terms)}" class="row g-3">
-        <div th:each="term : ${terms}" class="col-12 col-md-6 col-lg-4">
+    <div class="row g-3" th:unless="${#lists.isEmpty(terms)}">
+        <div class="col-12 col-md-6 col-lg-4" th:each="term : ${terms}">
 
             <div class="term-card h-100">
 
@@ -87,15 +101,15 @@
 
                 <!-- Tags -->
                 <div class="mb-3" th:unless="${#sets.isEmpty(term.tags)}">
-                    <span th:each="tag : ${term.tags}"
-                          class="badge me-1 mb-1"
+                    <span class="badge me-1 mb-1"
+                          th:each="tag : ${term.tags}"
                           th:text="${tag}">
                     </span>
                 </div>
 
                 <!-- Link -->
-                <a th:href="@{/terms/{id}(id=${term.id})}"
-                   class="term-link mt-auto">
+                <a class="term-link mt-auto"
+                   th:href="@{/terms/{id}(id=${term.id})}">
                     Read →
                 </a>
 
