@@ -2,6 +2,7 @@ package com.noahparknguyen.javadictionary.controller;
 
 import com.noahparknguyen.javadictionary.dto.request.CreateTermRequest;
 import com.noahparknguyen.javadictionary.dto.request.UpdateTermRequest;
+import com.noahparknguyen.javadictionary.dto.response.TermResponse;
 import com.noahparknguyen.javadictionary.model.ExperienceLevel;
 import com.noahparknguyen.javadictionary.service.TermService;
 import jakarta.validation.Valid;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashSet;
 
 @Slf4j
 @Controller
@@ -28,7 +31,7 @@ public class TermViewController {
             @RequestParam(required = false) String search,
             Model model) {
 
-        log.info("GET /terms - level: {}, search: '{}'",
+        log.debug("GET /terms - level: {}, search: '{}'",
                 experienceLevel != null ? experienceLevel : "none",
                 search != null ? search : "none");
 
@@ -43,15 +46,16 @@ public class TermViewController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        log.info("GET /terms/{} - fetching detail view", id);
-        model.addAttribute("term", termService.getTermById(id));
-        model.addAttribute("pageTitle", termService.getTermById(id).getName());
+        log.debug("GET /terms/{} - fetching detail view", id);
+        TermResponse term = termService.getTermById(id);
+        model.addAttribute("term", term);
+        model.addAttribute("pageTitle", term.name());
         return "terms/detail";
     }
 
     @GetMapping("/create")
     public String createForm(Model model) {
-        log.info("GET /terms/create - loading create form");
+        log.debug("GET /terms/create - loading create form");
         model.addAttribute("createTermRequest", new CreateTermRequest());
         model.addAttribute("experienceLevels", ExperienceLevel.values());
         model.addAttribute("pageTitle", "Add Term");
@@ -65,7 +69,10 @@ public class TermViewController {
             Model model) {
 
         if (result.hasErrors()) {
-            log.warn("POST /terms/create - validation failed: {}", result.getFieldErrors());
+            log.warn("POST /terms/create - validation failed - fields: {}",
+                    result.getFieldErrors().stream()
+                            .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                            .toList());
             model.addAttribute("experienceLevels", ExperienceLevel.values());
             model.addAttribute("pageTitle", "Add Term");
             return "terms/create";
@@ -78,8 +85,18 @@ public class TermViewController {
 
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
-        log.info("GET /terms/{}/edit - loading edit form", id);
-        model.addAttribute("term", termService.getTermById(id));
+        log.debug("GET /terms/{}/edit - loading edit form", id);
+        TermResponse term = termService.getTermById(id);
+
+        UpdateTermRequest request = new UpdateTermRequest();
+        request.setName(term.name());
+        request.setCasualDefinition(term.casualDefinition());
+        request.setFormalDefinition(term.formalDefinition());
+        request.setExperienceLevel(term.experienceLevel());
+        request.setTags(term.tags() != null ? new HashSet<>(term.tags()) : new HashSet<>());
+
+        model.addAttribute("term", term);
+        model.addAttribute("updateTermRequest", request);
         model.addAttribute("experienceLevels", ExperienceLevel.values());
         model.addAttribute("pageTitle", "Edit Term");
         return "terms/edit";
@@ -93,7 +110,12 @@ public class TermViewController {
             Model model) {
 
         if (result.hasErrors()) {
-            log.warn("POST /terms/{}/edit - validation failed: {}", id, result.getFieldErrors());
+            log.warn("POST /terms/{}/edit - validation failed - fields: {}",
+                    id,
+                    result.getFieldErrors().stream()
+                            .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                            .toList());
+            model.addAttribute("term", termService.getTermById(id));
             model.addAttribute("experienceLevels", ExperienceLevel.values());
             model.addAttribute("pageTitle", "Edit Term");
             return "terms/edit";
