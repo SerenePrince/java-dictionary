@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::content})}">
+<html lang="en" th:replace="~{layout/base :: layout(~{::content})}"
+      xmlns:th="http://www.thymeleaf.org">
 <body>
 
 <div th:fragment="content">
 
     <!-- Back -->
     <div class="mb-4">
-        <a th:href="@{/terms}" class="back-link">← All Terms</a>
+        <a class="back-link" th:href="@{/terms}">← All Terms</a>
     </div>
 
     <!-- Header -->
@@ -17,39 +17,41 @@
     </div>
 
     <!-- Form -->
-    <form th:action="@{/terms/create}" th:object="${createTermRequest}" method="post">
+    <form method="post" th:action="@{/terms/create}" th:object="${createTermRequest}">
 
         <!-- Basic Info -->
         <div class="form-section">
             <h6 class="mb-4">Basic Information</h6>
 
             <div class="mb-4">
-                <label class="form-label">Term Name</label>
-                <input type="text"
-                       class="form-control"
-                       th:field="*{name}"
+                <label class="form-label" for="name">Term Name</label>
+                <input class="form-control"
+                       id="name"
+                       placeholder="e.g. Polymorphism"
                        th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
-                       placeholder="e.g. Polymorphism">
+                       th:field="*{name}"
+                       type="text">
                 <div class="invalid-feedback"
-                     th:if="${#fields.hasErrors('name')}"
-                     th:errors="*{name}">
+                     th:errors="*{name}"
+                     th:if="${#fields.hasErrors('name')}">
                 </div>
             </div>
 
             <div class="mb-0">
-                <label class="form-label">Experience Level</label>
+                <label class="form-label" for="experienceLevel">Experience Level</label>
                 <select class="form-select"
-                        th:field="*{experienceLevel}"
-                        th:classappend="${#fields.hasErrors('experienceLevel')} ? 'is-invalid'">
+                        id="experienceLevel"
+                        th:classappend="${#fields.hasErrors('experienceLevel')} ? 'is-invalid'"
+                        th:field="*{experienceLevel}">
                     <option value="">Select a level...</option>
                     <option th:each="level : ${experienceLevels}"
-                            th:value="${level}"
-                            th:text="${level.displayName}">
+                            th:text="${level.displayName}"
+                            th:value="${level}">
                     </option>
                 </select>
                 <div class="invalid-feedback"
-                     th:if="${#fields.hasErrors('experienceLevel')}"
-                     th:errors="*{experienceLevel}">
+                     th:errors="*{experienceLevel}"
+                     th:if="${#fields.hasErrors('experienceLevel')}">
                 </div>
             </div>
         </div>
@@ -59,60 +61,60 @@
             <h6 class="mb-4">Definitions</h6>
 
             <div class="mb-4">
-                <label class="form-label">Casual Definition</label>
+                <label class="form-label" for="casualDefinition">Casual Definition</label>
                 <textarea class="form-control"
-                          th:field="*{casualDefinition}"
-                          th:classappend="${#fields.hasErrors('casualDefinition')} ? 'is-invalid'"
+                          id="casualDefinition"
+                          placeholder="Simple explanation in your own words..."
                           rows="4"
-                          placeholder="Simple explanation in your own words...">
+                          th:classappend="${#fields.hasErrors('casualDefinition')} ? 'is-invalid'"
+                          th:field="*{casualDefinition}">
                 </textarea>
                 <div class="invalid-feedback"
-                     th:if="${#fields.hasErrors('casualDefinition')}"
-                     th:errors="*{casualDefinition}">
+                     th:errors="*{casualDefinition}"
+                     th:if="${#fields.hasErrors('casualDefinition')}">
                 </div>
             </div>
 
             <div class="mb-0">
-                <label class="form-label">Formal Definition</label>
+                <label class="form-label" for="formalDefinition">Formal Definition</label>
                 <textarea class="form-control"
-                          th:field="*{formalDefinition}"
-                          th:classappend="${#fields.hasErrors('formalDefinition')} ? 'is-invalid'"
+                          id="formalDefinition"
+                          placeholder="Technical, interview-ready definition..."
                           rows="4"
-                          placeholder="Technical, interview-ready definition...">
+                          th:classappend="${#fields.hasErrors('formalDefinition')} ? 'is-invalid'"
+                          th:field="*{formalDefinition}">
                 </textarea>
                 <div class="invalid-feedback"
-                     th:if="${#fields.hasErrors('formalDefinition')}"
-                     th:errors="*{formalDefinition}">
+                     th:errors="*{formalDefinition}"
+                     th:if="${#fields.hasErrors('formalDefinition')}">
                 </div>
             </div>
         </div>
 
         <!-- Tags -->
         <div class="form-section">
-            <h6 class="mb-4">Tags</h6>
-
             <div class="mb-2">
-                <label class="form-label">Tags</label>
-                <input type="text"
+                <label class="form-label" for="tagsInput">Tags</label>
+                <input class="form-control"
                        id="tagsInput"
-                       class="form-control"
+                       placeholder="e.g. OOP, inheritance, polymorphism"
                        th:classappend="${#fields.hasErrors('tags')} ? 'is-invalid'"
-                       placeholder="e.g. OOP, inheritance, polymorphism">
+                       type="text">
                 <p class="form-text">Separate tags with commas (max 10).</p>
                 <div class="invalid-feedback"
-                     th:if="${#fields.hasErrors('tags')}"
-                     th:errors="*{tags}">
+                     th:errors="*{tags}"
+                     th:if="${#fields.hasErrors('tags')}">
                 </div>
             </div>
 
-            <div id="tagPreview" class="mt-2"></div>
+            <div class="mt-2" id="tagPreview"></div>
             <div id="tagInputs"></div>
         </div>
 
         <!-- Actions -->
         <div class="d-flex gap-2 pt-2">
-            <button type="submit" class="btn btn-primary">Save Term</button>
-            <a th:href="@{/terms}" class="btn btn-outline-secondary">Cancel</a>
+            <button class="btn btn-primary" type="submit">Save Term</button>
+            <a class="btn btn-outline-secondary" th:href="@{/terms}">Cancel</a>
         </div>
 
     </form>
