@@ -9,12 +9,21 @@ if (tagsInput) {
             .map(t => t.trim())
             .filter(t => t.length > 0);
 
-        tagPreview.innerHTML = tags
-            .map(t => `<span class="badge me-1 mb-1">${t}</span>`)
-            .join('');
+        tagPreview.innerHTML = '';
+        tags.forEach(t => {
+            const span = document.createElement('span');
+            span.className = 'badge me-1 mb-1';
+            span.textContent = t;
+            tagPreview.appendChild(span);
+        });
 
-        tagInputs.innerHTML = tags
-            .map(t => `<input type="hidden" name="tags" value="${t}">`)
-            .join('');
+        tagInputs.innerHTML = '';
+        tags.forEach(t => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'tags';
+            input.value = t;
+            tagInputs.appendChild(input);
+        });
     });
 }
