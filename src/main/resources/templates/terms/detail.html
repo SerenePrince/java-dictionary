@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::content})}">
+<html lang="en" th:replace="~{layout/base :: layout(~{::content})}"
+      xmlns:th="http://www.thymeleaf.org">
 <body>
 
 <div th:fragment="content">
 
     <!-- Back -->
     <div class="mb-4">
-        <a th:href="@{/terms}" class="back-link">← All Terms</a>
+        <a class="back-link" th:href="@{/terms}">← All Terms</a>
     </div>
 
     <!-- Header -->
@@ -20,15 +20,14 @@
         </div>
 
         <div class="d-flex gap-2 mt-1">
-            <a th:href="@{/terms/{id}/edit(id=${term.id})}"
-               class="btn btn-outline-primary btn-sm">
+            <a class="btn btn-outline-primary btn-sm"
+               th:href="@{/terms/{id}/edit(id=${term.id})}">
                 Edit
             </a>
-            <form th:action="@{/terms/{id}/delete(id=${term.id})}"
-                  method="post"
-                  onsubmit="return confirm('Delete this term?')">
-                <input type="hidden" name="_method" value="delete">
-                <button type="submit" class="btn btn-outline-danger btn-sm">
+            <form method="post"
+                  onsubmit="return confirm('Delete this term?')"
+                  th:action="@{/terms/{id}/delete(id=${term.id})}">
+                <button class="btn btn-outline-danger btn-sm" type="submit">
                     Delete
                 </button>
             </form>
@@ -55,11 +54,11 @@
     </div>
 
     <!-- Tags -->
-    <div th:unless="${#sets.isEmpty(term.tags)}" class="mt-4">
+    <div class="mt-4" th:unless="${#sets.isEmpty(term.tags)}">
         <p class="definition-label mb-2">Tags</p>
         <div>
-            <span th:each="tag : ${term.tags}"
-                  class="badge me-1 mb-1"
+            <span class="badge me-1 mb-1"
+                  th:each="tag : ${term.tags}"
                   th:text="${tag}">
             </span>
         </div>
