@@ -24,37 +24,45 @@ public class TermController {
     }
 
     @GetMapping
-    public List<TermResponse> getTerms(@RequestParam(required = false) ExperienceLevel experienceLevel) {
-        log.info("GET /terms - filter: {}", experienceLevel != null ? experienceLevel : "none");
-        return experienceLevel != null
-                ? termService.getTermsByExperienceLevel(experienceLevel)
-                : termService.getAllTerms();
+    public List<TermResponse> getTerms(
+            @RequestParam(required = false) ExperienceLevel experienceLevel,
+            @RequestParam(required = false) String search) {
+        log.info("GET /terms - level: {}, search: '{}'",
+                experienceLevel != null ? experienceLevel : "none",
+                search != null ? search : "none");
+        return termService.getFilteredTerms(experienceLevel, search);
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping("/{id}")
+    public TermResponse getTermById(@PathVariable Long id) {
+        log.info("GET /terms/{}", id);
+        return termService.getTermById(id);
+    }
+
+    @GetMapping("/tag/{tag}")
+    public List<TermResponse> getTermsByTag(@PathVariable String tag) {
+        log.info("GET /terms/tag/{}", tag);
+        return termService.getTermsByTag(tag);
+    }
+
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public TermResponse createTerm(@Valid @RequestBody CreateTermRequest request) {
         log.info("POST /terms - name: '{}'", request.getName());
         return termService.createTerm(request);
     }
 
-    @GetMapping("/{id}")
-    public TermResponse getTermById(@PathVariable Long id) {
-        log.info("GET /api/v1/terms/{}", id);
-        return termService.getTermById(id);
-    }
-
     @PutMapping("/{id}")
     public TermResponse updateTerm(@PathVariable Long id,
                                    @Valid @RequestBody UpdateTermRequest request) {
-        log.info("PUT /api/v1/terms/{}", id);
+        log.info("PUT /terms/{}", id);
         return termService.updateTerm(id, request);
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTerm(@PathVariable Long id) {
-        log.info("DELETE /api/v1/terms/{}", id);
+        log.info("DELETE /terms/{}", id);
         termService.deleteTerm(id);
     }
 }
