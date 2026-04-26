@@ -9,11 +9,10 @@ import com.noahparknguyen.javadictionary.model.ExperienceLevel;
 import com.noahparknguyen.javadictionary.model.Term;
 import com.noahparknguyen.javadictionary.repository.TermRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -29,9 +28,9 @@ public class TermService {
 
     @Transactional
     public TermResponse createTerm(CreateTermRequest request) {
-        log.info("Creating term with name: {}", request.getName());
+        log.info("Creating term: {}", request.getName());
         Term saved = termRepository.save(termMapper.toEntity(request));
-        log.debug("Term saved with id: {}", saved.getId());
+        log.debug("Term created with id: {}", saved.getId());
         return termMapper.toResponse(saved);
     }
 
@@ -44,57 +43,57 @@ public class TermService {
                 .toList();
     }
 
-    public List<TermResponse> getTermsByExperienceLevel(ExperienceLevel level) {
-        log.debug("Fetching terms for level: {}", level);
-        return termRepository.findByExperienceLevel(level)
-                .stream()
-                .map(termMapper::toResponse)
-                .toList();
+    @Transactional(readOnly = true)
+    public List<TermResponse> getFilteredTerms(ExperienceLevel level, String keyword) {
+        log.debug("Fetching filtered terms - level: {}, keyword: '{}'", level, keyword);
+
+        boolean hasLevel = level != null;
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+
+        if (hasLevel && hasKeyword) {
+            return termRepository.findByExperienceLevelAndNameContainingIgnoreCase(level, keyword)
+                    .stream().map(termMapper::toResponse).toList();
+        } else if (hasLevel) {
+            return termRepository.findByExperienceLevel(level)
+                    .stream().map(termMapper::toResponse).toList();
+        } else if (hasKeyword) {
+            return termRepository.findByNameContainingIgnoreCase(keyword)
+                    .stream().map(termMapper::toResponse).toList();
+        } else {
+            return termRepository.findAll()
+                    .stream().map(termMapper::toResponse).toList();
+        }
     }
 
-    // Filtered terms for the index page
-    public List<TermResponse> getFilteredTerms(ExperienceLevel level, String search) {
-        log.debug("Fetching filtered terms - level: {}, search: '{}'", level, search);
-
-        return termRepository.findAll()
-                .stream()
-                .filter(term -> level == null || term.getExperienceLevel() == level)
-                .filter(term -> search == null || search.isBlank() ||
-                        term.getName().toLowerCase().contains(search.toLowerCase()))
-                .map(termMapper::toResponse)
-                .toList();
-    }
-
-    // Single term for detail and edit pages
+    @Transactional(readOnly = true)
     public TermResponse getTermById(Long id) {
         log.debug("Fetching term by id: {}", id);
-        Term term = termRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Term not found with id: " + id));
-        return termMapper.toResponse(term);
+        return termRepository.findById(id)
+                .map(termMapper::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Term not found with id: " + id));
     }
 
-    // Update
+    @Transactional(readOnly = true)
+    public List<TermResponse> getTermsByTag(String tag) {
+        log.debug("Fetching terms by tag: {}", tag);
+        return termRepository.findByTagsContaining(tag)
+                .stream()
+                .map(termMapper::toResponse)
+                .toList();
+    }
+
     @Transactional
     public TermResponse updateTerm(Long id, UpdateTermRequest request) {
-        log.info("Updating term with id: {}", id);
+        log.info("Updating term id: {}", id);
         Term term = termRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Term not found with id: " + id));
-
-        term.setName(request.getName());
-        term.setCasualDefinition(request.getCasualDefinition());
-        term.setFormalDefinition(request.getFormalDefinition());
-        term.setExperienceLevel(request.getExperienceLevel());
-        term.setTags(request.getTags() != null ? request.getTags() : Set.of());
-
+                .orElseThrow(() -> new ResourceNotFoundException("Term not found with id: " + id));
+        termMapper.updateEntityFromRequest(term, request);
         return termMapper.toResponse(termRepository.save(term));
     }
 
-    // Delete
     @Transactional
     public void deleteTerm(Long id) {
-        log.info("Deleting term with id: {}", id);
+        log.info("Deleting term id: {}", id);
         if (!termRepository.existsById(id)) {
             throw new ResourceNotFoundException("Term not found with id: " + id);
         }
