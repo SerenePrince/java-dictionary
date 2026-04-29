@@ -1,6 +1,6 @@
 # Java Dictionary
 
-A personal study tool for Java interview prep. Built entirely with Spring Boot.
+A personal study tool for Java interview prep. Built with Spring Boot, PostgreSQL, and Thymeleaf.
 
 ---
 
