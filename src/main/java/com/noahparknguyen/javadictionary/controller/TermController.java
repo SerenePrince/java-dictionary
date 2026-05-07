@@ -28,7 +28,7 @@ public class TermController {
             @RequestParam(required = false) ExperienceLevel experienceLevel,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String tag) {
-        log.info("GET /terms - level: {}, search: '{}', tag: '{}'",
+        log.info("GET /terms — level: {}, search: '{}', tag: '{}'",
                 experienceLevel != null ? experienceLevel : "none",
                 search != null ? search : "none",
                 tag != null ? tag : "none");
@@ -44,15 +44,15 @@ public class TermController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TermResponse createTerm(@Valid @RequestBody CreateTermRequest request) {
-        log.info("POST /terms - name: '{}'", request.getName());
+        log.info("POST /terms — name: '{}'", request.getName());
         return termService.createTerm(request);
     }
 
     @PutMapping("/{id}")
-    public TermResponse updateTerm(@PathVariable Long id,
-                                   @Valid @RequestBody UpdateTermRequest request) {
-        log.info("PUT /terms/{}", id);
-        return termService.updateTerm(id, request);
+    public TermResponse saveDefinition(@PathVariable Long id,
+                                       @Valid @RequestBody UpdateTermRequest request) {
+        log.info("PUT /terms/{} — level: {}", id, request.getExperienceLevel());
+        return termService.saveDefinition(id, request);
     }
 
     @DeleteMapping("/{id}")

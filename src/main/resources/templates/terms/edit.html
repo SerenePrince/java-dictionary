@@ -16,20 +16,49 @@
         <p class="subtitle" th:text="'Editing: ' + ${term.name}">Editing term</p>
     </div>
 
-    <!-- Form bound to updateTermRequest for correct validation binding -->
+    <!--
+      Level switcher.
+      Each button is a link to GET /terms/{id}/edit?level=X so the server
+      re-renders the form pre-filled with that level's existing data (or blank
+      if no definition exists yet at that level).
+    -->
+    <div class="mb-4">
+        <p class="form-label mb-2">Experience Level</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-sm"
+               th:classappend="${level == selectedLevel} ? 'btn-primary' : 'btn-outline-secondary'"
+               th:each="level : ${experienceLevels}"
+               th:href="@{/terms/{id}/edit(id=${term.id}, level=${level})}">
+
+                <!-- Show a dot indicator if a definition already exists at this level -->
+                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:middle;"
+                      th:if="${term.definitions.containsKey(level)}"
+                      title="Definition written">
+                </span>
+
+                <span th:text="${level.displayName}">Level</span>
+            </a>
+        </div>
+        <p class="form-text mt-2"
+           th:if="${!term.definitions.containsKey(selectedLevel)}">
+            No definition written yet at this level — fill in the fields below to create one.
+        </p>
+    </div>
+
+    <!-- Form: saves/creates the definition at the selected level -->
     <form method="post"
           th:action="@{/terms/{id}/edit(id=${term.id})}"
           th:object="${updateTermRequest}">
 
-        <div th:replace="~{fragments/term-form :: termFormFields(${experienceLevels}, ${updateTermRequest.tags})}"></div>
+        <!-- Hidden: carries the selected level through the POST -->
+        <input th:field="*{experienceLevel}" type="hidden">
+
+        <div th:replace="~{fragments/term-form :: termFormFields(${experienceLevels}, ${updateTermRequest.tags}, false)}"></div>
 
         <!-- Actions -->
         <div class="d-flex gap-2 pt-2">
-            <button class="btn btn-primary" type="submit">Save Changes</button>
-            <a class="btn btn-outline-secondary"
-               th:href="@{/terms/{id}(id=${term.id})}">
-                Cancel
-            </a>
+            <button class="btn btn-primary" type="submit">Save Definition</button>
+            <a class="btn btn-outline-secondary" th:href="@{/terms/{id}(id=${term.id})}">Cancel</a>
         </div>
 
     </form>

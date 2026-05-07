@@ -3,15 +3,19 @@
 <body>
 
 <!--
-  Reusable form fields for create and edit term forms.
+  Reusable form fields shared by create and edit.
+
   Parameters:
-    - experienceLevels : ExperienceLevel[] passed from the model
-    - currentTags      : Set<String> of the current form object's tags (passed explicitly
-                         because *{tags} cannot be used inside th:value utility calls)
+    - experienceLevels : ExperienceLevel[] — only used when showLevelSelect is true
+    - currentTags      : Set<String> — the current form object's tags, passed explicitly
+                         so th:value utility calls work correctly
+    - showLevelSelect  : boolean — true on create (user picks a level), false on edit
+                         (level is controlled by the switcher / hidden input)
+
   The parent template must set th:object on the enclosing <form> so that
-  th:field="*{...}" expressions resolve correctly inside this fragment.
+  th:field="*{...}" expressions resolve correctly.
 -->
-<div th:fragment="termFormFields(experienceLevels, currentTags)">
+<div th:fragment="termFormFields(experienceLevels, currentTags, showLevelSelect)">
 
     <!-- Basic Info -->
     <div class="form-section">
@@ -31,7 +35,8 @@
             </div>
         </div>
 
-        <div class="mb-0">
+        <!-- Experience level select — only shown on the create form -->
+        <div class="mb-0" th:if="${showLevelSelect}">
             <label class="form-label" for="experienceLevel">Experience Level</label>
             <select class="form-select"
                     id="experienceLevel"

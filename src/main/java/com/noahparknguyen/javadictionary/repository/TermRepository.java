@@ -11,23 +11,31 @@ import java.util.Optional;
 
 public interface TermRepository extends JpaRepository<Term, Long> {
 
-    List<Term> findByExperienceLevel(ExperienceLevel experienceLevel);
+    boolean existsByNameIgnoreCase(String name);
 
     Optional<Term> findByNameIgnoreCase(String name);
 
-    boolean existsByNameIgnoreCase(String name);
+    /**
+     * Terms that have a definition written at the given level.
+     */
+    @Query("SELECT DISTINCT t FROM Term t JOIN t.definitions d WHERE d.experienceLevel = :level")
+    List<Term> findByDefinitionLevel(@Param("level") ExperienceLevel level);
 
-    List<Term> findByTagsContaining(String tag);
-
-    @Query("SELECT t FROM Term t WHERE " +
-           "LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(t.casualDefinition) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(t.formalDefinition) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    /**
+     * Full-text search across name and all definition text, any level.
+     */
+    @Query("SELECT DISTINCT t FROM Term t LEFT JOIN t.definitions d WHERE " +
+            "LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.casualDefinition) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.formalDefinition) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Term> searchByKeyword(@Param("keyword") String keyword);
 
-    @Query("SELECT t FROM Term t WHERE t.experienceLevel = :level AND (" +
-           "LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(t.casualDefinition) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(t.formalDefinition) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    /**
+     * Full-text search scoped to a specific level's definition.
+     */
+    @Query("SELECT DISTINCT t FROM Term t JOIN t.definitions d WHERE d.experienceLevel = :level AND (" +
+            "LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.casualDefinition) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.formalDefinition) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     List<Term> searchByKeywordAndLevel(@Param("keyword") String keyword, @Param("level") ExperienceLevel level);
 }

@@ -2,6 +2,7 @@ package com.noahparknguyen.javadictionary.controller;
 
 import com.noahparknguyen.javadictionary.dto.request.CreateTermRequest;
 import com.noahparknguyen.javadictionary.dto.request.UpdateTermRequest;
+import com.noahparknguyen.javadictionary.dto.response.TermDefinitionResponse;
 import com.noahparknguyen.javadictionary.dto.response.TermResponse;
 import com.noahparknguyen.javadictionary.exception.DuplicateResourceException;
 import com.noahparknguyen.javadictionary.model.ExperienceLevel;
@@ -26,6 +27,10 @@ public class TermViewController {
         this.termService = termService;
     }
 
+    // -------------------------------------------------------------------------
+    // INDEX
+    // -------------------------------------------------------------------------
+
     @GetMapping
     public String index(
             @RequestParam(required = false) ExperienceLevel experienceLevel,
@@ -33,7 +38,7 @@ public class TermViewController {
             @RequestParam(required = false) String tag,
             Model model) {
 
-        log.debug("GET /terms - level: {}, search: '{}', tag: '{}'",
+        log.debug("GET /terms — level: {}, search: '{}', tag: '{}'",
                 experienceLevel != null ? experienceLevel : "none",
                 search != null ? search : "none",
                 tag != null ? tag : "none");
@@ -48,18 +53,26 @@ public class TermViewController {
         return "terms/index";
     }
 
+    // -------------------------------------------------------------------------
+    // DETAIL
+    // -------------------------------------------------------------------------
+
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        log.debug("GET /terms/{} - fetching detail view", id);
+        log.debug("GET /terms/{}", id);
         TermResponse term = termService.getTermById(id);
         model.addAttribute("term", term);
         model.addAttribute("pageTitle", term.name());
         return "terms/detail";
     }
 
+    // -------------------------------------------------------------------------
+    // CREATE
+    // -------------------------------------------------------------------------
+
     @GetMapping("/create")
     public String createForm(Model model) {
-        log.debug("GET /terms/create - loading create form");
+        log.debug("GET /terms/create");
         model.addAttribute("createTermRequest", new CreateTermRequest());
         model.addAttribute("experienceLevels", ExperienceLevel.values());
         model.addAttribute("pageTitle", "Add Term");
@@ -73,84 +86,125 @@ public class TermViewController {
             Model model) {
 
         if (result.hasErrors()) {
-            log.warn("POST /terms/create - validation failed - fields: {}",
-                    result.getFieldErrors().stream()
-                            .map(e -> e.getField() + ": " + e.getDefaultMessage())
-                            .toList());
+            log.warn("POST /terms/create — validation failed");
             model.addAttribute("experienceLevels", ExperienceLevel.values());
             model.addAttribute("pageTitle", "Add Term");
             return "terms/create";
         }
 
         try {
-            log.info("POST /terms/create - creating term: '{}'", request.getName());
+            log.info("POST /terms/create — name: '{}'", request.getName());
             termService.createTerm(request);
         } catch (DuplicateResourceException e) {
-            log.warn("POST /terms/create - duplicate name: '{}'", request.getName());
+            log.warn("POST /terms/create — duplicate: '{}'", request.getName());
             result.rejectValue("name", "duplicate", e.getMessage());
             model.addAttribute("experienceLevels", ExperienceLevel.values());
             model.addAttribute("pageTitle", "Add Term");
             return "terms/create";
         }
+
         return "redirect:/terms";
     }
 
+    // -------------------------------------------------------------------------
+    // EDIT — level-aware upsert
+    // -------------------------------------------------------------------------
+
+    /**
+     * Renders the edit page for a term.
+     * An optional {@code level} query param controls which level's definitions
+     * are pre-filled in the form. Defaults to the first written level.
+     */
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
-        log.debug("GET /terms/{}/edit - loading edit form", id);
+    public String editForm(
+            @PathVariable Long id,
+            @RequestParam(required = false) ExperienceLevel level,
+            Model model) {
+
+        log.debug("GET /terms/{}/edit — level: {}", id, level);
         TermResponse term = termService.getTermById(id);
 
-        UpdateTermRequest request = new UpdateTermRequest();
-        request.setName(term.name());
-        request.setCasualDefinition(term.casualDefinition());
-        request.setFormalDefinition(term.formalDefinition());
-        request.setExperienceLevel(term.experienceLevel());
-        request.setTags(term.tags() != null ? new HashSet<>(term.tags()) : new HashSet<>());
+        // Resolve which level to display: explicit param > first written level
+        ExperienceLevel selectedLevel = level != null
+                ? level
+                : term.definitions().keySet().stream().findFirst().orElse(ExperienceLevel.ENTRY);
+
+        UpdateTermRequest request = buildUpdateRequest(term, selectedLevel);
 
         model.addAttribute("term", term);
         model.addAttribute("updateTermRequest", request);
         model.addAttribute("experienceLevels", ExperienceLevel.values());
+        model.addAttribute("selectedLevel", selectedLevel);
         model.addAttribute("pageTitle", "Edit Term");
+
         return "terms/edit";
     }
 
     @PostMapping("/{id}/edit")
-    public String updateTerm(
+    public String saveDefinition(
             @PathVariable Long id,
             @Valid @ModelAttribute UpdateTermRequest request,
             BindingResult result,
             Model model) {
 
         if (result.hasErrors()) {
-            log.warn("POST /terms/{}/edit - validation failed - fields: {}",
-                    id,
-                    result.getFieldErrors().stream()
-                            .map(e -> e.getField() + ": " + e.getDefaultMessage())
-                            .toList());
-            model.addAttribute("term", termService.getTermById(id));
+            log.warn("POST /terms/{}/edit — validation failed", id);
+            TermResponse term = termService.getTermById(id);
+            model.addAttribute("term", term);
             model.addAttribute("experienceLevels", ExperienceLevel.values());
+            model.addAttribute("selectedLevel", request.getExperienceLevel());
             model.addAttribute("pageTitle", "Edit Term");
             return "terms/edit";
         }
 
         try {
-            log.info("POST /terms/{}/edit - updating term", id);
-            termService.updateTerm(id, request);
+            log.info("POST /terms/{}/edit — level: {}", id, request.getExperienceLevel());
+            termService.saveDefinition(id, request);
         } catch (DuplicateResourceException e) {
-            log.warn("POST /terms/{}/edit - duplicate name: '{}'", id, request.getName());
+            log.warn("POST /terms/{}/edit — duplicate name: '{}'", id, request.getName());
             result.rejectValue("name", "duplicate", e.getMessage());
-            model.addAttribute("term", termService.getTermById(id));
+            TermResponse term = termService.getTermById(id);
+            model.addAttribute("term", term);
             model.addAttribute("experienceLevels", ExperienceLevel.values());
+            model.addAttribute("selectedLevel", request.getExperienceLevel());
             model.addAttribute("pageTitle", "Edit Term");
             return "terms/edit";
         }
+
         return "redirect:/terms/" + id;
     }
 
+    // -------------------------------------------------------------------------
+    // DELETE
+    // -------------------------------------------------------------------------
+
     @PostMapping("/{id}/delete")
     public String deleteTerm(@PathVariable Long id) {
-        log.info("POST /terms/{}/delete - deleting term", id);
+        log.info("POST /terms/{}/delete", id);
         termService.deleteTerm(id);
         return "redirect:/terms";
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Builds an UpdateTermRequest pre-filled with the existing definition at
+     * {@code level}, or with blank definition fields if none exists yet.
+     */
+    private UpdateTermRequest buildUpdateRequest(TermResponse term, ExperienceLevel level) {
+        UpdateTermRequest request = new UpdateTermRequest();
+        request.setName(term.name());
+        request.setExperienceLevel(level);
+
+        TermDefinitionResponse existing = term.definitions().get(level);
+        if (existing != null) {
+            request.setCasualDefinition(existing.casualDefinition());
+            request.setFormalDefinition(existing.formalDefinition());
+            request.setTags(existing.tags() != null ? new HashSet<>(existing.tags()) : new HashSet<>());
+        }
+
+        return request;
     }
 }

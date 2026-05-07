@@ -2,14 +2,11 @@ package com.noahparknguyen.javadictionary.dto.response;
 
 import com.noahparknguyen.javadictionary.model.ExperienceLevel;
 
-import java.util.Set;
+import java.util.Map;
 
 public record TermResponse(
         Long id,
         String name,
-        String casualDefinition,
-        String formalDefinition,
-        ExperienceLevel experienceLevel,
-        Set<String> tags
+        Map<ExperienceLevel, TermDefinitionResponse> definitions
 ) {
 }

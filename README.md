@@ -6,16 +6,19 @@ A personal study tool for Java interview prep. Built with Spring Boot, PostgreSQ
 
 ## What is this?
 
-Interview prep usually means memorizing buzzwords and hoping you can regurgitate them under pressure. That never worked for me.
+Interview prep usually means memorizing buzzwords and hoping you can regurgitate them under pressure. That never worked
+for me.
 
-What actually works is being able to explain something in your own words — not just the "right" answer, but *why* the right answer is right. That's what this tool is for.
+What actually works is being able to explain something in your own words — not just the "right" answer, but *why* the
+right answer is right. That's what this tool is for.
 
 Java Dictionary lets you store Java concepts and terms with two types of definitions:
 
 - **Casual definition** — your own explanation. The mental model that actually makes sense to you.
 - **Formal definition** — the polished, interviewer-facing answer.
 
-The idea is that if you can write both, you actually understand the concept. If you can only write one, you know where the gap is.
+The idea is that if you can write both, you actually understand the concept. If you can only write one, you know where
+the gap is.
 
 ---
 
@@ -32,15 +35,16 @@ The idea is that if you can write both, you actually understand the concept. If 
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Spring Boot 4 |
-| Language | Java 17 |
-| Frontend | Thymeleaf |
-| Database | PostgreSQL |
-| Build Tool | Maven |
+| Layer      | Technology    |
+|------------|---------------|
+| Framework  | Spring Boot 4 |
+| Language   | Java 17       |
+| Frontend   | Thymeleaf     |
+| Database   | PostgreSQL    |
+| Build Tool | Maven         |
 
-The decision to use Thymeleaf instead of a separate frontend framework was intentional. This project is meant to demonstrate Spring Boot end-to-end — backend, templating, data layer, all of it.
+The decision to use Thymeleaf instead of a separate frontend framework was intentional. This project is meant to
+demonstrate Spring Boot end-to-end — backend, templating, data layer, all of it.
 
 ---
 
@@ -81,14 +85,14 @@ If you're using IntelliJ, you can just hit the run button once the environment v
 
 Base path: `/api/v1/terms`
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/v1/terms` | Get all terms. Supports `?experienceLevel=` and `?search=` query params |
-| `GET` | `/api/v1/terms/{id}` | Get a term by ID |
-| `GET` | `/api/v1/terms/tag/{tag}` | Get all terms with a specific tag |
-| `POST` | `/api/v1/terms` | Create a new term |
-| `PUT` | `/api/v1/terms/{id}` | Update an existing term |
-| `DELETE` | `/api/v1/terms/{id}` | Delete a term |
+| Method   | Endpoint                  | Description                                                             |
+|----------|---------------------------|-------------------------------------------------------------------------|
+| `GET`    | `/api/v1/terms`           | Get all terms. Supports `?experienceLevel=` and `?search=` query params |
+| `GET`    | `/api/v1/terms/{id}`      | Get a term by ID                                                        |
+| `GET`    | `/api/v1/terms/tag/{tag}` | Get all terms with a specific tag                                       |
+| `POST`   | `/api/v1/terms`           | Create a new term                                                       |
+| `PUT`    | `/api/v1/terms/{id}`      | Update an existing term                                                 |
+| `DELETE` | `/api/v1/terms/{id}`      | Delete a term                                                           |
 
 The Thymeleaf views are served under `/terms` and cover the same CRUD operations.
 
@@ -98,7 +102,8 @@ The Thymeleaf views are served under `/terms` and cover the same CRUD operations
 
 The MVP covers the core use case. Here's what's planned:
 
-- **Guided learning path** — use experience level and tags to generate a structured study path, so you're not just browsing a list of terms but actually working through them in a logical order
+- **Guided learning path** — use experience level and tags to generate a structured study path, so you're not just
+  browsing a list of terms but actually working through them in a logical order
 - **Authentication** — right now this is a personal tool; auth would let it work for multiple users
 - **Caching** — planned once the data layer is more stable
 - **Unit tests** — full test coverage is on the list

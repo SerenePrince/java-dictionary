@@ -2,13 +2,12 @@ package com.noahparknguyen.javadictionary.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "terms")
@@ -25,22 +24,12 @@ public class Term {
     @NotBlank
     private String name;
 
-    @Column(nullable = false, length = 500)
-    @NotBlank
-    @Size(max = 500)
-    private String casualDefinition;
-
-    @Column(nullable = false, length = 1000)
-    @NotBlank
-    @Size(max = 1000)
-    private String formalDefinition;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ExperienceLevel experienceLevel;
-
-    @ElementCollection
-    @CollectionTable(name = "term_tags", joinColumns = @JoinColumn(name = "term_id"))
-    @Column(name = "tag")
-    private Set<String> tags = new HashSet<>();
+    /**
+     * Definitions keyed by experience level.
+     * A term can have at most one definition per level.
+     * The map key is the experienceLevel field of TermDefinition.
+     */
+    @OneToMany(mappedBy = "term", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @MapKey(name = "experienceLevel")
+    private Map<ExperienceLevel, TermDefinition> definitions = new HashMap<>();
 }

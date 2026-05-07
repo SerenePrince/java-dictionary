@@ -22,7 +22,7 @@
                     <input class="form-control"
                            id="search"
                            name="search"
-                           placeholder="Search terms..."
+                           placeholder="Search terms and definitions..."
                            th:value="${search}"
                            type="text">
                 </div>
@@ -63,10 +63,7 @@
     </div>
 
     <!-- Results Count -->
-    <p class="results-count"
-       th:text="${#lists.size(terms)} + ' terms'">
-        0 terms
-    </p>
+    <p class="results-count" th:text="${#lists.size(terms)} + ' terms'">0 terms</p>
 
     <!-- Empty State -->
     <div class="empty-state" th:if="${#lists.isEmpty(terms)}">
@@ -78,40 +75,54 @@
     <!-- Terms Grid -->
     <div class="row g-3" th:unless="${#lists.isEmpty(terms)}">
         <div class="col-12 col-md-6 col-lg-4" th:each="term : ${terms}">
-
             <div class="term-card h-100">
 
-                <!-- Level Badge -->
-                <div class="mb-2">
-                    <span class="badge"
-                          th:text="${term.experienceLevel.displayName}">
-                    </span>
+                <!--
+                  If a level filter is active: show that level's definition in the card.
+                  If unfiltered: show the term name + all available level badges.
+                -->
+
+                <!-- Filtered view -->
+                <div th:if="${selectedLevel != null}"
+                     th:with="def=${term.definitions.get(selectedLevel)}">
+
+                    <div class="mb-2">
+                        <span class="badge" th:text="${selectedLevel.displayName}"></span>
+                    </div>
+
+                    <p class="term-name" th:text="${term.name}">Term Name</p>
+
+                    <p class="term-definition" th:text="${def?.casualDefinition}">Definition</p>
+
+                    <div class="mb-3" th:unless="${def == null or #sets.isEmpty(def.tags)}">
+                        <span class="badge me-1 mb-1"
+                              th:each="tag : ${def.tags}"
+                              th:text="${tag}">
+                        </span>
+                    </div>
                 </div>
 
-                <!-- Title -->
-                <p class="term-name" th:text="${term.name}">Term Name</p>
+                <!-- Unfiltered view -->
+                <div th:unless="${selectedLevel != null}">
 
-                <!-- Definition -->
-                <p class="term-definition" th:text="${term.casualDefinition}">
-                    Casual definition
-                </p>
+                    <div class="mb-2">
+                        <span class="badge me-1"
+                              th:each="entry : ${term.definitions}"
+                              th:text="${entry.key.displayName}">
+                        </span>
+                    </div>
 
-                <!-- Tags -->
-                <div class="mb-3" th:unless="${#sets.isEmpty(term.tags)}">
-                    <span class="badge me-1 mb-1"
-                          th:each="tag : ${term.tags}"
-                          th:text="${tag}">
-                    </span>
+                    <p class="term-name" th:text="${term.name}">Term Name</p>
+
                 </div>
 
-                <!-- Link -->
+                <!-- Link (always shown) -->
                 <a class="term-link mt-auto"
                    th:href="@{/terms/{id}(id=${term.id})}">
                     Read →
                 </a>
 
             </div>
-
         </div>
     </div>
 
