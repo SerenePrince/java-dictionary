@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layout/base :: layout(~{::content})}"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="content">
+
+    <div class="page-header">
+        <h1>Something went wrong.</h1>
+        <p class="subtitle">An unexpected error occurred. Please try again or return to the dictionary.</p>
+    </div>
+
+    <div class="mb-5">
+        <p class="results-count" th:text="'Error ' + ${status}">Error</p>
+        <p th:text="${error}">Internal Server Error</p>
+    </div>
+
+    <a class="btn btn-primary" th:href="@{/terms}">← Back to Dictionary</a>
+
+</div>
+
+</body>
+</html>
