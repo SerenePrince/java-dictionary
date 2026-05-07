@@ -3,6 +3,7 @@ package com.noahparknguyen.javadictionary.controller;
 import com.noahparknguyen.javadictionary.dto.request.CreateTermRequest;
 import com.noahparknguyen.javadictionary.dto.request.UpdateTermRequest;
 import com.noahparknguyen.javadictionary.dto.response.TermResponse;
+import com.noahparknguyen.javadictionary.exception.DuplicateResourceException;
 import com.noahparknguyen.javadictionary.model.ExperienceLevel;
 import com.noahparknguyen.javadictionary.service.TermService;
 import jakarta.validation.Valid;
@@ -29,16 +30,19 @@ public class TermViewController {
     public String index(
             @RequestParam(required = false) ExperienceLevel experienceLevel,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String tag,
             Model model) {
 
-        log.debug("GET /terms - level: {}, search: '{}'",
+        log.debug("GET /terms - level: {}, search: '{}', tag: '{}'",
                 experienceLevel != null ? experienceLevel : "none",
-                search != null ? search : "none");
+                search != null ? search : "none",
+                tag != null ? tag : "none");
 
-        model.addAttribute("terms", termService.getFilteredTerms(experienceLevel, search));
+        model.addAttribute("terms", termService.getFilteredTerms(experienceLevel, search, tag));
         model.addAttribute("experienceLevels", ExperienceLevel.values());
         model.addAttribute("selectedLevel", experienceLevel);
         model.addAttribute("search", search);
+        model.addAttribute("selectedTag", tag);
         model.addAttribute("pageTitle", "All Terms");
 
         return "terms/index";
@@ -78,8 +82,16 @@ public class TermViewController {
             return "terms/create";
         }
 
-        log.info("POST /terms/create - creating term: '{}'", request.getName());
-        termService.createTerm(request);
+        try {
+            log.info("POST /terms/create - creating term: '{}'", request.getName());
+            termService.createTerm(request);
+        } catch (DuplicateResourceException e) {
+            log.warn("POST /terms/create - duplicate name: '{}'", request.getName());
+            result.rejectValue("name", "duplicate", e.getMessage());
+            model.addAttribute("experienceLevels", ExperienceLevel.values());
+            model.addAttribute("pageTitle", "Add Term");
+            return "terms/create";
+        }
         return "redirect:/terms";
     }
 
@@ -121,8 +133,17 @@ public class TermViewController {
             return "terms/edit";
         }
 
-        log.info("POST /terms/{}/edit - updating term", id);
-        termService.updateTerm(id, request);
+        try {
+            log.info("POST /terms/{}/edit - updating term", id);
+            termService.updateTerm(id, request);
+        } catch (DuplicateResourceException e) {
+            log.warn("POST /terms/{}/edit - duplicate name: '{}'", id, request.getName());
+            result.rejectValue("name", "duplicate", e.getMessage());
+            model.addAttribute("term", termService.getTermById(id));
+            model.addAttribute("experienceLevels", ExperienceLevel.values());
+            model.addAttribute("pageTitle", "Edit Term");
+            return "terms/edit";
+        }
         return "redirect:/terms/" + id;
     }
 

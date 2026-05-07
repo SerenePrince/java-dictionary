@@ -26,11 +26,13 @@ public class TermController {
     @GetMapping
     public List<TermResponse> getTerms(
             @RequestParam(required = false) ExperienceLevel experienceLevel,
-            @RequestParam(required = false) String search) {
-        log.info("GET /terms - level: {}, search: '{}'",
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String tag) {
+        log.info("GET /terms - level: {}, search: '{}', tag: '{}'",
                 experienceLevel != null ? experienceLevel : "none",
-                search != null ? search : "none");
-        return termService.getFilteredTerms(experienceLevel, search);
+                search != null ? search : "none",
+                tag != null ? tag : "none");
+        return termService.getFilteredTerms(experienceLevel, search, tag);
     }
 
     @GetMapping("/{id}")

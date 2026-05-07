@@ -3,6 +3,7 @@ package com.noahparknguyen.javadictionary.service;
 import com.noahparknguyen.javadictionary.dto.request.CreateTermRequest;
 import com.noahparknguyen.javadictionary.dto.request.UpdateTermRequest;
 import com.noahparknguyen.javadictionary.dto.response.TermResponse;
+import com.noahparknguyen.javadictionary.exception.DuplicateResourceException;
 import com.noahparknguyen.javadictionary.exception.ResourceNotFoundException;
 import com.noahparknguyen.javadictionary.mapper.TermMapper;
 import com.noahparknguyen.javadictionary.model.ExperienceLevel;
@@ -29,6 +30,9 @@ public class TermService {
     @Transactional
     public TermResponse createTerm(CreateTermRequest request) {
         log.info("Creating term: {}", request.getName());
+        if (termRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new DuplicateResourceException("A term named '" + request.getName() + "' already exists");
+        }
         Term saved = termRepository.save(termMapper.toEntity(request));
         log.debug("Term created with id: {}", saved.getId());
         return termMapper.toResponse(saved);
@@ -44,25 +48,34 @@ public class TermService {
     }
 
     @Transactional(readOnly = true)
-    public List<TermResponse> getFilteredTerms(ExperienceLevel level, String keyword) {
-        log.debug("Fetching filtered terms - level: {}, keyword: '{}'", level, keyword);
+    public List<TermResponse> getFilteredTerms(ExperienceLevel level, String keyword, String tag) {
+        log.debug("Fetching filtered terms - level: {}, keyword: '{}', tag: '{}'", level, keyword, tag);
 
         boolean hasLevel = level != null;
         boolean hasKeyword = keyword != null && !keyword.isBlank();
+        boolean hasTag = tag != null && !tag.isBlank();
+
+        List<Term> terms;
 
         if (hasLevel && hasKeyword) {
-            return termRepository.findByExperienceLevelAndNameContainingIgnoreCase(level, keyword)
-                    .stream().map(termMapper::toResponse).toList();
+            terms = termRepository.findByExperienceLevelAndNameContainingIgnoreCase(level, keyword);
         } else if (hasLevel) {
-            return termRepository.findByExperienceLevel(level)
-                    .stream().map(termMapper::toResponse).toList();
+            terms = termRepository.findByExperienceLevel(level);
         } else if (hasKeyword) {
-            return termRepository.findByNameContainingIgnoreCase(keyword)
-                    .stream().map(termMapper::toResponse).toList();
+            terms = termRepository.findByNameContainingIgnoreCase(keyword);
         } else {
-            return termRepository.findAll()
-                    .stream().map(termMapper::toResponse).toList();
+            terms = termRepository.findAll();
         }
+
+        if (hasTag) {
+            String tagLower = tag.toLowerCase();
+            terms = terms.stream()
+                    .filter(t -> t.getTags().stream()
+                            .anyMatch(tg -> tg.toLowerCase().contains(tagLower)))
+                    .toList();
+        }
+
+        return terms.stream().map(termMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -87,6 +100,10 @@ public class TermService {
         log.info("Updating term id: {}", id);
         Term term = termRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Term not found with id: " + id));
+        if (!term.getName().equalsIgnoreCase(request.getName())
+                && termRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new DuplicateResourceException("A term named '" + request.getName() + "' already exists");
+        }
         termMapper.updateEntityFromRequest(term, request);
         return termMapper.toResponse(termRepository.save(term));
     }

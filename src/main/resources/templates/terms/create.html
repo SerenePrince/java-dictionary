@@ -99,6 +99,7 @@
                        id="tagsInput"
                        placeholder="e.g. OOP, inheritance, polymorphism"
                        th:classappend="${#fields.hasErrors('tags')} ? 'is-invalid'"
+                       th:value="${#strings.listJoin(createTermRequest.tags, ', ')}"
                        type="text">
                 <p class="form-text">Separate tags with commas (max 10).</p>
                 <div class="invalid-feedback"
@@ -107,8 +108,19 @@
                 </div>
             </div>
 
-            <div class="mt-2" id="tagPreview"></div>
-            <div id="tagInputs"></div>
+            <div class="mt-2" id="tagPreview">
+                <span class="badge me-1 mb-1"
+                      th:each="tag : ${createTermRequest.tags}"
+                      th:text="${tag}">
+                </span>
+            </div>
+
+            <div id="tagInputs">
+                <input name="tags"
+                       th:each="tag : ${createTermRequest.tags}"
+                       th:value="${tag}"
+                       type="hidden">
+            </div>
         </div>
 
         <!-- Actions -->

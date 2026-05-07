@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -31,5 +32,5 @@ public class CreateTermRequest {
     private ExperienceLevel experienceLevel;
 
     @Size(max = 10, message = "You can have at most 10 tags")
-    private Set<@NotBlank String> tags;
+    private Set<@NotBlank String> tags = new HashSet<>();
 }
