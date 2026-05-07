@@ -41,12 +41,6 @@ public class TermController {
         return termService.getTermById(id);
     }
 
-    @GetMapping("/tag/{tag}")
-    public List<TermResponse> getTermsByTag(@PathVariable String tag) {
-        log.info("GET /terms/tag/{}", tag);
-        return termService.getTermsByTag(tag);
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TermResponse createTerm(@Valid @RequestBody CreateTermRequest request) {
