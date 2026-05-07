@@ -39,15 +39,6 @@ public class TermService {
     }
 
     @Transactional(readOnly = true)
-    public List<TermResponse> getAllTerms() {
-        log.debug("Fetching all terms");
-        return termRepository.findAll()
-                .stream()
-                .map(termMapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
     public List<TermResponse> getFilteredTerms(ExperienceLevel level, String keyword, String tag) {
         log.debug("Fetching filtered terms - level: {}, keyword: '{}', tag: '{}'", level, keyword, tag);
 
@@ -58,11 +49,11 @@ public class TermService {
         List<Term> terms;
 
         if (hasLevel && hasKeyword) {
-            terms = termRepository.findByExperienceLevelAndNameContainingIgnoreCase(level, keyword);
+            terms = termRepository.searchByKeywordAndLevel(keyword, level);
         } else if (hasLevel) {
             terms = termRepository.findByExperienceLevel(level);
         } else if (hasKeyword) {
-            terms = termRepository.findByNameContainingIgnoreCase(keyword);
+            terms = termRepository.searchByKeyword(keyword);
         } else {
             terms = termRepository.findAll();
         }
@@ -84,15 +75,6 @@ public class TermService {
         return termRepository.findById(id)
                 .map(termMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("Term not found with id: " + id));
-    }
-
-    @Transactional(readOnly = true)
-    public List<TermResponse> getTermsByTag(String tag) {
-        log.debug("Fetching terms by tag: {}", tag);
-        return termRepository.findByTagsContaining(tag)
-                .stream()
-                .map(termMapper::toResponse)
-                .toList();
     }
 
     @Transactional
