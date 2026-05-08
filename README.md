@@ -58,28 +58,50 @@ demonstrate Spring Boot end-to-end — backend, templating, data layer, all of i
 - Maven
 - PostgreSQL (running locally or via a service like Render)
 
+### Profiles
+
+The app uses Spring profiles to separate local and production configuration:
+
+| Profile | File                          | When it's used              |
+|---------|-------------------------------|-----------------------------|
+| `dev`   | `application-dev.properties`  | Local development           |
+| `prod`  | `application-prod.properties` | Deployment / production     |
+
+`application.properties` holds shared settings common to both profiles.
+
 ### Environment Variables
 
-The app expects two environment variables for the database connection:
+**Dev profile** — set `DB_USERNAME` and `DB_PASSWORD` in your IntelliJ run configuration or shell.
+The database URL is hardcoded to `localhost:5432/java_dictionary`.
+
+**Prod profile** — set all three as secrets in your deployment service:
 
 ```
+DB_URL=jdbc:postgresql://<host>:<port>/<database>
 DB_USERNAME=your_db_username
 DB_PASSWORD=your_db_password
 ```
 
-These are referenced in `application.properties`. Don't hardcode your credentials.
+Never hardcode credentials.
 
 ### Running the App
 
 ```bash
-# Build the project
-./mvnw clean install
-
-# Run the app
-./mvnw spring-boot:run
+# Local development (dev profile)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-If you're using IntelliJ, set the environment variables in your run configuration and hit Run.
+If you're using IntelliJ, add `spring.profiles.active=dev` to the Active profiles field
+(or set it as a VM option: `-Dspring.profiles.active=dev`) in your run configuration alongside
+the `DB_USERNAME` and `DB_PASSWORD` environment variables.
+
+**Activating the prod profile on your deployment service** — add this environment variable:
+
+```
+SPRING_PROFILES_ACTIVE=prod
+```
+
+Spring Boot reads this automatically, no code changes needed.
 
 ### Database Migrations
 
