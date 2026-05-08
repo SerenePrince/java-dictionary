@@ -1,0 +1,343 @@
+roadmap:
+  volumes:
+
+    # ─────────────────────────────────────────────
+    # VOLUME 1: Java Foundations
+    # ─────────────────────────────────────────────
+    - slug: java-foundations
+      name: "Java Foundations"
+      description: "The essentials every Java developer needs before anything else — how Java runs, what types look like, and how control flows."
+      chapters:
+
+        - name: "How Java Works"
+          description: "Understand the platform that makes Java tick before writing a single line of code."
+          entries:
+            - term: "JVM"
+              experienceLevel: ENTRY
+              tags: ["jvm", "runtime", "bytecode"]
+              resources:
+                - title: "Oracle — JVM Overview"
+                  url: "https://docs.oracle.com/en/java/javase/17/vm/java-virtual-machine-technology-overview.html"
+                - title: "Baeldung — JVM, JRE, and JDK"
+                  url: "https://www.baeldung.com/jvm-vs-jre-vs-jdk"
+              hints:
+                what: "What is the JVM and what problem does it solve?"
+                why: "Why is the JVM central to Java's 'write once, run anywhere' promise?"
+                how: "How does Java source code become something the JVM can execute?"
+
+            - term: "JDK"
+              experienceLevel: ENTRY
+              tags: ["jdk", "toolchain", "compiler"]
+              resources:
+                - title: "Baeldung — JVM, JRE, and JDK"
+                  url: "https://www.baeldung.com/jvm-vs-jre-vs-jdk"
+              hints:
+                what: "What tools does the JDK bundle together?"
+                why: "Why do developers need the JDK rather than just the JRE?"
+                how: "How does javac compile a .java file into bytecode?"
+
+            - term: "Bytecode"
+              experienceLevel: ENTRY
+              tags: ["bytecode", "compilation", "jvm"]
+              resources:
+                - title: "DZone — Java Bytecode Basics"
+                  url: "https://dzone.com/articles/introduction-to-java-bytecode"
+              hints:
+                what: "What is bytecode and how does it differ from machine code?"
+                why: "Why does Java compile to bytecode instead of native machine code?"
+                how: "How can you inspect the bytecode of a compiled class?"
+
+            - term: "Garbage Collection"
+              experienceLevel: ENTRY
+              tags: ["gc", "memory", "heap"]
+              resources:
+                - title: "Oracle — Garbage Collection Basics"
+                  url: "https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html"
+                - title: "Baeldung — JVM Garbage Collectors"
+                  url: "https://www.baeldung.com/jvm-garbage-collectors"
+              hints:
+                what: "What is garbage collection and what does the GC manage?"
+                why: "Why does Java use automatic memory management instead of manual allocation?"
+                how: "How does the JVM decide an object is eligible for collection?"
+
+        - name: "Primitive Types"
+          description: "The eight building blocks that everything else is built on."
+          entries:
+            - term: "Primitive Type"
+              experienceLevel: ENTRY
+              tags: ["primitives", "types", "data-types"]
+              resources:
+                - title: "Oracle Docs — Primitive Data Types"
+                  url: "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html"
+              hints:
+                what: "What are the eight primitive types in Java?"
+                why: "Why does Java distinguish primitives from objects?"
+                how: "How are primitives stored differently from objects in memory?"
+
+            - term: "int"
+              experienceLevel: ENTRY
+              tags: ["primitives", "integer", "numeric"]
+              resources:
+                - title: "Oracle Docs — Primitive Data Types"
+                  url: "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html"
+              hints:
+                what: "What range of values can an int hold and how many bytes does it use?"
+                why: "When would you choose int over long or short?"
+                how: "What happens when an int value overflows its bounds?"
+
+            - term: "boolean"
+              experienceLevel: ENTRY
+              tags: ["primitives", "boolean", "logic"]
+              resources:
+                - title: "Oracle Docs — Primitive Data Types"
+                  url: "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html"
+              hints:
+                what: "What two values can a boolean hold?"
+                why: "How is a boolean used to control conditional logic?"
+                how: "How does Java evaluate boolean expressions in if-statements and loops?"
+
+            - term: "char"
+              experienceLevel: ENTRY
+              tags: ["primitives", "char", "unicode"]
+              resources:
+                - title: "Oracle Docs — Primitive Data Types"
+                  url: "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html"
+              hints:
+                what: "What does char store and what encoding does it use?"
+                why: "Why is char a 16-bit unsigned type in Java?"
+                how: "How do you write a char literal and convert between char and int?"
+
+        - name: "Strings"
+          description: "Strings are not primitives — understanding them unlocks a lot about how Java handles objects."
+          entries:
+            - term: "String"
+              experienceLevel: ENTRY
+              tags: ["string", "immutable", "reference-type"]
+              resources:
+                - title: "Oracle Docs — String"
+                  url: "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html"
+                - title: "Baeldung — Java String Guide"
+                  url: "https://www.baeldung.com/java-string"
+              hints:
+                what: "What is a String in Java, and is it a primitive or an object?"
+                why: "Why are Strings immutable, and what advantages does immutability give?"
+                how: "How do you create a String, and what common methods does the String class provide?"
+
+            - term: "String Concatenation"
+              experienceLevel: ENTRY
+              tags: ["string", "concatenation", "operators"]
+              resources:
+                - title: "Baeldung — Java String Concatenation"
+                  url: "https://www.baeldung.com/java-string-concatenation-methods"
+              hints:
+                what: "What are the ways to concatenate Strings in Java?"
+                why: "Why can repeated + concatenation inside a loop be a performance problem?"
+                how: "How does the compiler optimize simple + concatenation under the hood?"
+
+        - name: "Control Flow"
+          description: "The tools that give your programs decision-making power and repetition."
+          entries:
+            - term: "if-else"
+              experienceLevel: ENTRY
+              tags: ["control-flow", "conditional", "branching"]
+              resources:
+                - title: "Oracle Docs — Control Flow"
+                  url: "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/flow.html"
+              hints:
+                what: "What does an if-else statement do?"
+                why: "When would you chain multiple else-if blocks versus using a switch?"
+                how: "How does Java evaluate a boolean condition and decide which branch to take?"
+
+            - term: "for loop"
+              experienceLevel: ENTRY
+              tags: ["control-flow", "loop", "iteration"]
+              resources:
+                - title: "Oracle Docs — Control Flow"
+                  url: "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/flow.html"
+              hints:
+                what: "What are the three parts of a classic for loop?"
+                why: "When is a for loop preferable to a while loop?"
+                how: "How do you iterate over an array using a for loop?"
+
+            - term: "while loop"
+              experienceLevel: ENTRY
+              tags: ["control-flow", "loop", "iteration"]
+              resources:
+                - title: "Oracle Docs — Control Flow"
+                  url: "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/flow.html"
+              hints:
+                what: "How does a while loop differ from a for loop?"
+                why: "When is a while loop a better fit than a for loop?"
+                how: "How do you avoid an infinite loop?"
+
+            - term: "switch"
+              experienceLevel: ENTRY
+              tags: ["control-flow", "switch", "branching"]
+              resources:
+                - title: "Oracle Docs — Switch Statement"
+                  url: "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/switch.html"
+              hints:
+                what: "What does a switch statement do and what types can it switch on?"
+                why: "When is switch cleaner than a chain of if-else?"
+                how: "What is fall-through and how do you prevent it with break?"
+
+    # ─────────────────────────────────────────────
+    # VOLUME 2: Object-Oriented Programming
+    # ─────────────────────────────────────────────
+    - slug: oop
+      name: "Object-Oriented Programming"
+      description: "The four pillars of OOP and how Java implements each — the foundation of every Java codebase."
+      chapters:
+
+        - name: "Classes and Objects"
+          description: "What classes and objects are, and how they relate to each other."
+          entries:
+            - term: "Class"
+              experienceLevel: ENTRY
+              tags: ["oop", "class", "blueprint"]
+              resources:
+                - title: "Oracle Docs — Classes"
+                  url: "https://docs.oracle.com/javase/tutorial/java/javaOO/classes.html"
+              hints:
+                what: "What is a class in Java?"
+                why: "Why do we model real-world concepts as classes?"
+                how: "How do you define a class with fields and methods?"
+
+            - term: "Object"
+              experienceLevel: ENTRY
+              tags: ["oop", "object", "instance"]
+              resources:
+                - title: "Oracle Docs — Objects"
+                  url: "https://docs.oracle.com/javase/tutorial/java/javaOO/objects.html"
+              hints:
+                what: "What is an object and how does it relate to a class?"
+                why: "Why do we say objects have state and behavior?"
+                how: "How do you instantiate an object from a class using the new keyword?"
+
+            - term: "Constructor"
+              experienceLevel: ENTRY
+              tags: ["oop", "constructor", "instantiation"]
+              resources:
+                - title: "Oracle Docs — Constructors"
+                  url: "https://docs.oracle.com/javase/tutorial/java/javaOO/constructors.html"
+              hints:
+                what: "What is a constructor and how does it differ from a method?"
+                why: "Why would you define multiple constructors on the same class?"
+                how: "How does Java pick which constructor to call when you write new MyClass(...)?"
+
+        - name: "Encapsulation"
+          description: "Hiding internal state and exposing only what the outside world needs."
+          entries:
+            - term: "Encapsulation"
+              experienceLevel: ENTRY
+              tags: ["oop", "encapsulation", "access-control"]
+              resources:
+                - title: "Baeldung — Java Encapsulation"
+                  url: "https://www.baeldung.com/java-encapsulation"
+              hints:
+                what: "What is encapsulation and what problem does it solve?"
+                why: "Why is exposing fields directly considered bad practice?"
+                how: "How do private fields combined with getters/setters enforce encapsulation?"
+
+            - term: "Access Modifier"
+              experienceLevel: ENTRY
+              tags: ["oop", "access-modifiers", "visibility"]
+              resources:
+                - title: "Oracle Docs — Controlling Access"
+                  url: "https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html"
+              hints:
+                what: "What are the four access modifiers in Java?"
+                why: "Why does controlling visibility matter for maintainable code?"
+                how: "How do public, private, protected, and package-private differ in what they expose?"
+
+        - name: "Inheritance"
+          description: "Building new types by extending existing ones."
+          entries:
+            - term: "Inheritance"
+              experienceLevel: JUNIOR
+              tags: ["oop", "inheritance", "extends"]
+              resources:
+                - title: "Oracle Docs — Inheritance"
+                  url: "https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html"
+                - title: "Baeldung — Java Inheritance"
+                  url: "https://www.baeldung.com/java-inheritance"
+              hints:
+                what: "What does it mean for one class to inherit from another?"
+                why: "When does inheritance make a design better, and when does it make it worse?"
+                how: "How do you use extends, and what does a subclass automatically gain?"
+
+            - term: "super"
+              experienceLevel: JUNIOR
+              tags: ["oop", "inheritance", "super"]
+              resources:
+                - title: "Oracle Docs — Using super"
+                  url: "https://docs.oracle.com/javase/tutorial/java/IandI/super.html"
+              hints:
+                what: "What does the super keyword refer to in a subclass?"
+                why: "Why would you call super() in a constructor or super.method() in an override?"
+                how: "How does Java use super to chain constructor calls up the hierarchy?"
+
+            - term: "Method Overriding"
+              experienceLevel: JUNIOR
+              tags: ["oop", "polymorphism", "overriding"]
+              resources:
+                - title: "Oracle Docs — Overriding Methods"
+                  url: "https://docs.oracle.com/javase/tutorial/java/IandI/override.html"
+              hints:
+                what: "What does it mean to override a method?"
+                why: "Why use @Override and what does it protect you from?"
+                how: "What rules must an overriding method follow regarding signature and return type?"
+
+        - name: "Polymorphism"
+          description: "One interface, many implementations — Java's most powerful OOP tool."
+          entries:
+            - term: "Polymorphism"
+              experienceLevel: JUNIOR
+              tags: ["oop", "polymorphism", "dynamic-dispatch"]
+              resources:
+                - title: "Baeldung — Java Polymorphism"
+                  url: "https://www.baeldung.com/java-polymorphism"
+              hints:
+                what: "What is polymorphism and what two forms does it take in Java?"
+                why: "Why does polymorphism make code more flexible and easier to extend?"
+                how: "How does Java decide at runtime which method implementation to call?"
+
+            - term: "Interface"
+              experienceLevel: JUNIOR
+              tags: ["oop", "interface", "contract"]
+              resources:
+                - title: "Oracle Docs — Interfaces"
+                  url: "https://docs.oracle.com/javase/tutorial/java/IandI/createinterface.html"
+                - title: "Baeldung — Java Interfaces"
+                  url: "https://www.baeldung.com/java-interfaces"
+              hints:
+                what: "What is an interface in Java and what can it contain?"
+                why: "Why are interfaces preferred over abstract classes for defining contracts?"
+                how: "How do you implement an interface, and what happens if you miss a method?"
+
+            - term: "Abstract Class"
+              experienceLevel: JUNIOR
+              tags: ["oop", "abstract-class", "inheritance"]
+              resources:
+                - title: "Oracle Docs — Abstract Classes"
+                  url: "https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html"
+                - title: "Baeldung — Abstract Classes"
+                  url: "https://www.baeldung.com/java-abstract-class"
+              hints:
+                what: "What makes a class abstract and what can it contain that an interface cannot?"
+                why: "When would you reach for an abstract class instead of an interface?"
+                how: "How does a subclass fulfil the contract of an abstract class?"
+
+        - name: "Abstraction"
+          description: "Hiding complexity behind clean, simple interfaces."
+          entries:
+            - term: "Abstraction"
+              experienceLevel: JUNIOR
+              tags: ["oop", "abstraction", "design"]
+              resources:
+                - title: "Baeldung — Abstraction in Java"
+                  url: "https://www.baeldung.com/java-abstraction"
+              hints:
+                what: "What is abstraction as an OOP principle?"
+                why: "Why does hiding implementation details produce more maintainable code?"
+                how: "How do interfaces and abstract classes both serve as abstraction mechanisms?"

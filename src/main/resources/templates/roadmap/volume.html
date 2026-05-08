@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layout/base :: layout(~{::content})}"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="content">
+
+    <!-- Back -->
+    <div class="mb-4">
+        <a class="back-link" th:href="@{/roadmap}">← Roadmap</a>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 th:text="${volume.name}">Volume Name</h1>
+        <p class="subtitle" th:text="${volume.description}">Description</p>
+    </div>
+
+    <!-- ── Success banner ── -->
+    <div class="alert roadmap-alert-success mb-4"
+         th:if="${successMessage}"
+         th:text="${successMessage}">
+    </div>
+
+    <!-- ── Override confirmation banner ── -->
+    <!--
+      Shown after a submit attempt when the term already has a definition at that level.
+      Carries the pending data back to the user for confirmation.
+    -->
+    <div class="roadmap-override-banner mb-5" th:if="${overrideWarning}">
+        <p class="mb-1" style="font-weight: 500;">⚠ Override Confirmation</p>
+        <p class="mb-3" style="font-size: 0.9rem; color: #555;" th:text="${overrideWarning}"></p>
+        <form method="post" th:action="@{/roadmap/{slug}/submit(slug=${volume.slug})}">
+            <input name="termName"           type="hidden" th:value="${pendingTermName}">
+            <input name="experienceLevel"    type="hidden" th:value="${pendingLevel}">
+            <input name="casualDefinition"   type="hidden" th:value="${pendingCasualDefinition}">
+            <input name="formalDefinition"   type="hidden" th:value="${pendingFormalDefinition}">
+            <input name="override"           type="hidden" value="true">
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm" type="submit">Yes, Override</button>
+                <a class="btn btn-outline-secondary btn-sm"
+                   th:href="@{/roadmap/{slug}(slug=${volume.slug})}">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── Chapters ── -->
+    <div class="mb-5" th:each="chapter, chapterStat : ${chapters}">
+
+        <!-- Chapter heading -->
+        <div class="roadmap-chapter-header">
+            <h2 class="mb-1" style="font-size: 1.25rem;" th:text="${chapter.name}">Chapter</h2>
+            <p class="text-muted mb-0" style="font-size: 0.88rem;"
+               th:if="${chapter.description}"
+               th:text="${chapter.description}">
+            </p>
+        </div>
+
+        <!-- Entries accordion -->
+        <div class="accordion roadmap-accordion"
+             th:id="'chapter-' + ${chapterStat.index}">
+
+            <div class="accordion-item roadmap-accordion-item"
+                 th:each="entry, entryStat : ${chapter.entries}"
+                 th:id="'entry-' + ${chapterStat.index} + '-' + ${entryStat.index}">
+
+                <!-- Accordion header -->
+                <h2 class="accordion-header">
+                    <button class="accordion-button roadmap-accordion-button collapsed"
+                            data-bs-toggle="collapse"
+                            type="button"
+                            th:attr="data-bs-target='#collapse-' + ${chapterStat.index} + '-' + ${entryStat.index},
+                                     aria-controls='collapse-' + ${chapterStat.index} + '-' + ${entryStat.index}"
+                            aria-expanded="false">
+
+                        <span class="roadmap-entry-name" th:text="${entry.term}">Term</span>
+
+                        <span class="badge ms-2"
+                              th:text="${entry.experienceLevel.displayName}">
+                        </span>
+
+                        <!-- Saved indicator -->
+                        <span class="roadmap-saved-badge ms-2"
+                              th:if="${entry.alreadySaved}">
+                            ✓ Saved
+                        </span>
+
+                    </button>
+                </h2>
+
+                <!-- Accordion body -->
+                <div class="accordion-collapse collapse roadmap-accordion-collapse"
+                     th:id="'collapse-' + ${chapterStat.index} + '-' + ${entryStat.index}">
+                    <div class="accordion-body roadmap-accordion-body">
+
+                        <!-- Resources -->
+                        <div class="mb-4" th:unless="${#lists.isEmpty(entry.resources)}">
+                            <p class="definition-label mb-2">Resources</p>
+                            <ul class="roadmap-resource-list">
+                                <li th:each="resource : ${entry.resources}">
+                                    <a th:href="${resource.url}"
+                                       th:text="${resource.title}"
+                                       target="_blank"
+                                       rel="noopener noreferrer">Link</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Research hints -->
+                        <div class="mb-4" th:if="${entry.hints != null}">
+                            <p class="definition-label mb-3">Research Hints</p>
+                            <div class="roadmap-hints">
+                                <div class="roadmap-hint" th:if="${entry.hints.what}">
+                                    <span class="roadmap-hint-label">What</span>
+                                    <span th:text="${entry.hints.what}"></span>
+                                </div>
+                                <div class="roadmap-hint" th:if="${entry.hints.why}">
+                                    <span class="roadmap-hint-label">Why</span>
+                                    <span th:text="${entry.hints.why}"></span>
+                                </div>
+                                <div class="roadmap-hint" th:if="${entry.hints.how}">
+                                    <span class="roadmap-hint-label">How</span>
+                                    <span th:text="${entry.hints.how}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr style="border-color: #eeeeee; margin: 1.5rem 0;">
+
+                        <!-- Mini definition form -->
+                        <form method="post"
+                              th:action="@{/roadmap/{slug}/submit(slug=${volume.slug})}">
+
+                            <input name="termName"        type="hidden" th:value="${entry.term}">
+                            <input name="experienceLevel" type="hidden" th:value="${entry.experienceLevel}">
+
+                            <!-- Tags display (read-only chips) -->
+                            <div class="mb-3" th:unless="${#sets.isEmpty(entry.tags)}">
+                                <p class="definition-label mb-2">Tags</p>
+                                <span class="badge me-1"
+                                      th:each="tag : ${entry.tags}"
+                                      th:text="${tag}">
+                                </span>
+                            </div>
+
+                            <!-- Casual definition -->
+                            <div class="mb-3">
+                                <label class="form-label"
+                                       th:for="'casual-' + ${chapterStat.index} + '-' + ${entryStat.index}">
+                                    Casual Definition
+                                </label>
+                                <textarea class="form-control"
+                                          rows="3"
+                                          placeholder="Explain it like you're talking to a friend..."
+                                          name="casualDefinition"
+                                          th:id="'casual-' + ${chapterStat.index} + '-' + ${entryStat.index}"
+                                          required
+                                          maxlength="500">
+                                </textarea>
+                                <div class="form-text">Max 500 characters</div>
+                            </div>
+
+                            <!-- Formal definition -->
+                            <div class="mb-3">
+                                <label class="form-label"
+                                       th:for="'formal-' + ${chapterStat.index} + '-' + ${entryStat.index}">
+                                    Formal Definition
+                                </label>
+                                <textarea class="form-control"
+                                          rows="4"
+                                          placeholder="A precise, technical definition..."
+                                          name="formalDefinition"
+                                          th:id="'formal-' + ${chapterStat.index} + '-' + ${entryStat.index}"
+                                          required
+                                          maxlength="1000">
+                                </textarea>
+                                <div class="form-text">Max 1000 characters</div>
+                            </div>
+
+                            <!-- Override warning (shown when a definition already exists) -->
+                            <div class="roadmap-override-note mb-3" th:if="${entry.alreadySaved}">
+                                ⚠ A definition at this level already exists. Submitting will override it.
+                            </div>
+
+                            <button class="btn btn-primary btn-sm" type="submit">
+                                Save Definition
+                            </button>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!--
+  If an override warning is pending, scroll to and open the accordion
+  for the affected entry so the user can see the context.
+-->
+<script th:if="${pendingTermName}" th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const pendingTerm = /*[[${pendingTermName}]]*/ '';
+        const buttons = document.querySelectorAll('.roadmap-accordion-button');
+        buttons.forEach(function (btn) {
+            const name = btn.querySelector('.roadmap-entry-name');
+            if (name && name.textContent.trim() === pendingTerm) {
+                btn.classList.remove('collapsed');
+                const targetId = btn.getAttribute('data-bs-target');
+                const collapse = document.querySelector(targetId);
+                if (collapse) {
+                    collapse.classList.add('show');
+                    collapse.scrollIntoView({behavior: 'smooth', block: 'start'});
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

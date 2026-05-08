@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layout/base :: layout(~{::content})}"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="content">
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Learning Roadmap</h1>
+        <p class="subtitle">A structured path through Java — one volume at a time. Work through each volume in order, define every term, and build your dictionary as you go.</p>
+    </div>
+
+    <!-- Volume Grid -->
+    <div class="row g-4">
+        <div class="col-12 col-md-6" th:each="volume : ${volumes}">
+            <div class="roadmap-volume-card h-100">
+
+                <p class="definition-label mb-2" th:text="${volume.name}">Volume Name</p>
+
+                <p class="text-muted mb-4" style="font-size: 0.9rem;" th:text="${volume.description}">Description</p>
+
+                <div class="mt-auto">
+                    <span class="results-count mb-3 d-block"
+                          th:text="${#lists.size(volume.chapters)} + ' chapters'">
+                    </span>
+                    <a class="roadmap-start-link"
+                       th:href="@{/roadmap/{slug}(slug=${volume.slug})}">
+                        Start Volume →
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
