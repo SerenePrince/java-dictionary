@@ -461,6 +461,164 @@ footer .copyright {
 }
 
 /* =========================
+   ROADMAP
+   ========================= */
+
+.roadmap-volume-card {
+    border: 1px solid #e8e8e8;
+    padding: 2rem;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s ease;
+}
+
+.roadmap-volume-card:hover {
+    border-color: #aaaaaa;
+}
+
+.roadmap-start-link {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: #111111;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #111111;
+    padding-bottom: 1px;
+    align-self: flex-start;
+    transition: opacity 0.15s ease;
+}
+
+.roadmap-start-link:hover {
+    opacity: 0.5;
+    color: #111111;
+}
+
+/* Chapter header */
+.roadmap-chapter-header {
+    padding: 2rem 0 1rem;
+    border-top: 1px solid #eeeeee;
+    margin-top: 0.5rem;
+}
+
+/* Accordion */
+.roadmap-accordion {
+    border: none;
+}
+
+.roadmap-accordion-item {
+    border: none;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.roadmap-accordion-button {
+    background: #ffffff !important;
+    color: #111111 !important;
+    font-family: 'Lora', Georgia, serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 1.1rem 0;
+    box-shadow: none !important;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.roadmap-accordion-button::after {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.roadmap-accordion-button:focus {
+    box-shadow: none !important;
+    outline: none;
+}
+
+.roadmap-entry-name {
+    font-family: 'Lora', Georgia, serif;
+    font-weight: 600;
+}
+
+.roadmap-saved-badge {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #666666;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+.roadmap-accordion-collapse {
+    /* no extra styles needed — Bootstrap handles show/hide */
+}
+
+.roadmap-accordion-body {
+    padding: 0.5rem 0 2rem;
+}
+
+/* Resources */
+.roadmap-resource-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.roadmap-resource-list li {
+    font-size: 0.9rem;
+    margin-bottom: 0.35rem;
+}
+
+/* Research hints */
+.roadmap-hints {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.roadmap-hint {
+    font-size: 0.9rem;
+    color: #333333;
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 0.5rem;
+    align-items: baseline;
+}
+
+.roadmap-hint-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #aaaaaa;
+}
+
+/* Override note inside form */
+.roadmap-override-note {
+    font-size: 0.82rem;
+    color: #888888;
+    padding: 0.6rem 0.9rem;
+    border-left: 2px solid #dddddd;
+}
+
+/* Alert banners */
+.roadmap-alert-success {
+    font-size: 0.88rem;
+    color: #2d6a2d;
+    background: #f0f7f0;
+    border: 1px solid #c3dfc3;
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+}
+
+.roadmap-override-banner {
+    border: 1px solid #e8e0cc;
+    background: #fdf9f0;
+    padding: 1.25rem 1.5rem;
+}
+
+/* =========================
    RESULTS COUNT
    ========================= */
 
