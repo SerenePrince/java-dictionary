@@ -14,6 +14,27 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Provides read and write operations that bridge the static roadmap configuration
+ * with live term data in the database.
+ *
+ * <p>The roadmap itself is entirely config-driven: volumes, chapters, and entries are
+ * defined in {@code roadmap.yaml} and loaded at startup via {@link RoadmapProperties}.
+ * This service enriches that static structure with per-entry DB state (does a definition
+ * exist yet?) and delegates actual term persistence to {@link TermService}.
+ *
+ * <p><b>Key design decision — per-entry DB checks:</b> {@link #getChapterViews} issues
+ * one DB query per roadmap entry to check whether a definition exists. This is intentional:
+ * a single bulk query would require either an {@code IN} clause over term names or a join
+ * that is hard to express in JPQL while also filtering by book/chapter. At roadmap scale
+ * (tens of entries per chapter) the N+1 pattern is negligible and keeps the query logic
+ * simple and readable.
+ *
+ * <p>{@code sourceBook} is resolved from the volume's {@code book} field at submit time,
+ * not stored in the form. This avoids exposing a free-text book name as a hidden input
+ * (which callers could tamper with) and keeps the config as the single source of truth
+ * for how roadmap entries are labelled in the DB.
+ */
 @Slf4j
 @Service
 public class RoadmapService {
@@ -32,10 +53,16 @@ public class RoadmapService {
 
     // ── Volume lookups ────────────────────────────────────────────────────────
 
+    /** Returns all volumes defined in the roadmap configuration. */
     public List<VolumeConfig> getAllVolumes() {
         return roadmapProperties.getVolumes();
     }
 
+    /**
+     * Looks up a single volume by its URL slug.
+     *
+     * @throws ResourceNotFoundException if no volume with the given slug exists in the config
+     */
     public VolumeConfig getVolume(String slug) {
         return roadmapProperties.getVolumes().stream()
                 .filter(v -> v.getSlug().equals(slug))
@@ -66,6 +93,12 @@ public class RoadmapService {
                 .toList();
     }
 
+    /**
+     * Maps a single roadmap entry config to its view DTO, annotating it with DB state.
+     *
+     * <p>Issues one DB query per call via {@code findByNameAndSource}. See the class-level
+     * Javadoc for the rationale behind this N+1 approach.
+     */
     private RoadmapEntryView toEntryView(EntryConfig entry, String sourceBook, String sourceChapter) {
         return termRepository.findByNameAndSource(entry.getTerm(), sourceBook, sourceChapter)
                 .map(term -> RoadmapEntryView.of(entry, true, term.getId()))

@@ -15,6 +15,18 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Thymeleaf MVC controller for the terms UI.
+ *
+ * <p>Handles all user-facing pages under {@code /terms}: the index (with search and
+ * filter controls), the group detail accordion, and create/edit/delete flows. All
+ * state is rendered server-side; there is no client-side framework involved.
+ *
+ * <p>This controller is intentionally excluded from the OpenAPI spec — SpringDoc
+ * scans only {@code /api/v1/**} paths (see {@code application.properties}). Error
+ * cases (duplicate name, validation failures) are surfaced via {@link BindingResult}
+ * and re-rendered in the form template rather than throwing exceptions.
+ */
 @Slf4j
 @Controller
 @RequestMapping("/terms")

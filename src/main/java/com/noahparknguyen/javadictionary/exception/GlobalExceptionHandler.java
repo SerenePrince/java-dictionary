@@ -13,6 +13,18 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Centralised exception-to-HTTP-response mapping for the REST API.
+ *
+ * <p>Scoped to {@link TermController} via {@code assignableTypes} so that exceptions
+ * thrown inside Thymeleaf MVC controllers ({@code TermViewController},
+ * {@code RoadmapController}) are not intercepted here and instead propagate to
+ * Spring MVC's default error handling. This prevents the handler from hijacking
+ * 404s or other errors on page routes and returning a JSON body where HTML is expected.
+ *
+ * <p>All responses use the {@link ErrorResponse} record, which carries a status code,
+ * a human-readable message, an optional per-field validation error map, and a timestamp.
+ */
 @Slf4j
 @RestControllerAdvice(assignableTypes = TermController.class)
 public class GlobalExceptionHandler {

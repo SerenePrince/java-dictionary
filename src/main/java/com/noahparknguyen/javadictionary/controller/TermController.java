@@ -21,6 +21,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST API controller for term management.
+ *
+ * <p>Exposes CRUD operations on dictionary terms under {@code /api/v1/terms}.
+ * All endpoints return and consume JSON. This controller is intentionally thin —
+ * validation is handled by Bean Validation annotations on the request DTO,
+ * exception mapping lives in {@link com.noahparknguyen.javadictionary.exception.GlobalExceptionHandler},
+ * and business logic is in {@link com.noahparknguyen.javadictionary.service.TermService}.
+ *
+ * <p>This controller is excluded from Thymeleaf-based routing and is the only
+ * class scanned by SpringDoc for the Swagger UI. Path matching is narrowed to
+ * {@code /api/v1/**} via {@code springdoc.paths-to-match} in {@code application.properties}.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/terms")

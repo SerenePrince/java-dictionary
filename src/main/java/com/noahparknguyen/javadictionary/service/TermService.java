@@ -16,6 +16,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Business logic layer for dictionary term management.
+ *
+ * <p>This service is the single point of truth for create, read, update, and
+ * delete operations on {@link com.noahparknguyen.javadictionary.model.Term} entities.
+ * It enforces uniqueness rules, controls which fields can be edited on manual vs.
+ * book-sourced terms, and delegates all entity↔DTO conversion to {@link TermMapper}.
+ *
+ * <p><b>Manual vs. book-sourced terms:</b> the distinction drives two different code
+ * paths throughout this class. Manual terms allow name and tag changes; book-sourced
+ * terms lock those fields and only allow definition edits. See
+ * {@link com.noahparknguyen.javadictionary.model.Term#isManual()} for the canonical
+ * definition of "manual."
+ *
+ * <p><b>Grouping:</b> the flat DB rows are grouped by slug at the mapper layer, not
+ * here. This service returns grouped views to callers by passing a raw {@code List<Term>}
+ * to {@link TermMapper#toGroupViews} or {@link TermMapper#toGroupView}.
+ */
 @Slf4j
 @Service
 public class TermService {
@@ -47,9 +65,21 @@ public class TermService {
     }
 
     /**
-     * Creates or updates a book-sourced term.
-     * If a term already exists for (name, sourceBook, sourceChapter) and override is false,
-     * throws IllegalStateException so the caller can ask for confirmation.
+     * Creates or updates a book-sourced term identified by the composite key
+     * {@code (name, sourceBook, sourceChapter)}.
+     *
+     * <p><b>Override semantics:</b> if a term with the same composite key already exists
+     * and {@code override} is {@code false}, an {@link IllegalStateException} is thrown
+     * with a user-facing message prompting confirmation. The roadmap controller catches
+     * this and re-renders the submit form with a confirmation checkbox, allowing the user
+     * to resubmit with {@code override = true} to update the existing entry's definitions.
+     *
+     * <p>Source fields ({@code sourceBook}, {@code sourceChapter}) and tags are set on
+     * creation but are not modified during an override — only {@code casualDefinition}
+     * and {@code formalDefinition} are updated.
+     *
+     * @param override {@code true} to update an existing entry; {@code false} to fail fast
+     * @throws IllegalStateException if a matching term exists and {@code override} is false
      */
     @Transactional
     public TermResponse saveBookTerm(String name, String casualDefinition, String formalDefinition,
@@ -84,6 +114,11 @@ public class TermService {
 
     // ── READ ──────────────────────────────────────────────────────────────────
 
+    /**
+     * Returns a single term by its primary key.
+     *
+     * @throws ResourceNotFoundException if no term with the given id exists
+     */
     @Transactional(readOnly = true)
     public TermResponse getTermById(Long id) {
         return termRepository.findById(id)
@@ -91,6 +126,12 @@ public class TermService {
                 .orElseThrow(() -> new ResourceNotFoundException("Term", id));
     }
 
+    /**
+     * Returns all entries sharing the given slug, grouped into a {@link TermGroupView}.
+     * Results are ordered by source book then chapter (see repository query).
+     *
+     * @throws ResourceNotFoundException if no terms match the slug
+     */
     @Transactional(readOnly = true)
     public TermGroupView getTermGroup(String slug) {
         List<Term> terms = termRepository.findAllBySlugOrderBySourceBookAscSourceChapterAsc(slug);
@@ -101,11 +142,24 @@ public class TermService {
     }
 
     /**
-     * Returns all terms grouped by slug, with optional filters.
+     * Returns all term groups matching the given filters, grouped by slug and sorted alphabetically.
      *
-     * @param search filter by name (case-insensitive substring match)
-     * @param tag    filter groups where at least one entry carries this tag
-     * @param book   "manual" for manually added terms, book title for book terms, null for all
+     * <p>Filters are applied at the DB layer where possible (search + book combinations map
+     * to distinct repository queries). The tag filter has no matching index so it is applied
+     * in-memory after the DB fetch — acceptable at personal scale.
+     *
+     * <p><b>Filter combinations:</b>
+     * <ul>
+     *   <li>Both {@code search} and {@code book}: scoped name search</li>
+     *   <li>{@code book} only: all terms from that source</li>
+     *   <li>{@code search} only: name search across all sources</li>
+     *   <li>Neither: all terms</li>
+     * </ul>
+     *
+     * @param search case-insensitive substring match on term name; {@code null} or blank to skip
+     * @param tag    keep only entries that carry this tag (case-insensitive); {@code null} to skip
+     * @param book   {@code "manual"} for manually added terms, a book title for book-sourced terms,
+     *               or {@code null} for all terms
      */
     @Transactional(readOnly = true)
     public List<TermGroupView> getFilteredGroups(String search, String tag, String book) {
@@ -146,8 +200,17 @@ public class TermService {
     // ── UPDATE ────────────────────────────────────────────────────────────────
 
     /**
-     * Updates a manual term's name, definitions, and tags.
-     * For book-sourced terms, only definitions are updated — source fields and tags are locked.
+     * Updates an existing term by its id, applying different rules based on term type.
+     *
+     * <p><b>Manual terms</b> allow all fields to change: name, definitions, and tags.
+     * If the name changes, a duplicate-name check is performed against other manual terms.
+     *
+     * <p><b>Book-sourced terms</b> only allow definition edits. Name, source fields, and
+     * tags are locked because they are derived from the roadmap YAML and changing them
+     * manually would cause drift between the DB and the config.
+     *
+     * @throws ResourceNotFoundException  if no term with the given id exists
+     * @throws DuplicateResourceException if a manual term's name is changed to one that already exists
      */
     @Transactional
     public TermResponse updateTerm(Long id, CreateTermRequest request) {
@@ -174,6 +237,11 @@ public class TermService {
 
     // ── DELETE ────────────────────────────────────────────────────────────────
 
+    /**
+     * Deletes a term by its primary key.
+     *
+     * @throws ResourceNotFoundException if no term with the given id exists
+     */
     @Transactional
     public void deleteTerm(Long id) {
         log.info("Deleting term id: {}", id);

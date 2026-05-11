@@ -9,6 +9,21 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Thymeleaf MVC controller for the roadmap UI.
+ *
+ * <p>Renders the roadmap index (volume cards) and per-volume chapter pages. It also
+ * handles the inline definition submit form on each chapter page, which is the primary
+ * way book-sourced terms enter the dictionary.
+ *
+ * <p><b>Override flow:</b> when a user submits a definition for a term that already has
+ * one, {@link RoadmapService#submitEntry} throws an {@link IllegalStateException}. This
+ * controller catches that, stores the pending form values as flash attributes, and
+ * redirects back to the volume page, where the template re-populates the form and shows
+ * a confirmation checkbox. The user submits again with {@code override=true} to proceed.
+ * Flash attributes are used (rather than model attributes) so that a browser refresh after
+ * the redirect does not re-submit the form.
+ */
 @Slf4j
 @Controller
 @RequestMapping("/roadmap")
