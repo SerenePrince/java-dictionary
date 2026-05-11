@@ -13,7 +13,11 @@
     <!-- Header -->
     <div class="page-header">
         <h1 th:text="${volume.name}">Volume Name</h1>
-        <p class="subtitle" th:text="${volume.description}">Description</p>
+        <p class="text-muted mb-1" style="font-size: 0.85rem;"
+           th:if="${volume.book}"
+           th:text="${volume.book} + ' · Java 21 coverage'">
+        </p>
+        <p class="subtitle mt-2" th:text="${volume.description}">Description</p>
     </div>
 
     <!-- ── Success banner ── -->
@@ -24,15 +28,15 @@
 
     <!-- ── Override confirmation banner ── -->
     <!--
-      Shown after a submit attempt when the term already has a definition at that level.
-      Carries the pending data back to the user for confirmation.
+      Shown after a submit attempt when the term already has a definition for
+      this (book, chapter) combination. Carries pending data back for confirmation.
     -->
     <div class="roadmap-override-banner mb-5" th:if="${overrideWarning}">
         <p class="mb-1" style="font-weight: 500;">⚠ Override Confirmation</p>
         <p class="mb-3" style="font-size: 0.9rem; color: #555;" th:text="${overrideWarning}"></p>
         <form method="post" th:action="@{/roadmap/{slug}/submit(slug=${volume.slug})}">
             <input name="termName"           type="hidden" th:value="${pendingTermName}">
-            <input name="experienceLevel"    type="hidden" th:value="${pendingLevel}">
+            <input name="chapterName"        type="hidden" th:value="${pendingChapterName}">
             <input name="casualDefinition"   type="hidden" th:value="${pendingCasualDefinition}">
             <input name="formalDefinition"   type="hidden" th:value="${pendingFormalDefinition}">
             <input name="override"           type="hidden" value="true">
@@ -74,10 +78,6 @@
                             aria-expanded="false">
 
                         <span class="roadmap-entry-name" th:text="${entry.term}">Term</span>
-
-                        <span class="badge ms-2"
-                              th:text="${entry.experienceLevel.displayName}">
-                        </span>
 
                         <!-- Saved indicator -->
                         <span class="roadmap-saved-badge ms-2"
@@ -131,10 +131,10 @@
                         <form method="post"
                               th:action="@{/roadmap/{slug}/submit(slug=${volume.slug})}">
 
-                            <input name="termName"        type="hidden" th:value="${entry.term}">
-                            <input name="experienceLevel" type="hidden" th:value="${entry.experienceLevel}">
+                            <input name="termName"    type="hidden" th:value="${entry.term}">
+                            <input name="chapterName" type="hidden" th:value="${chapter.name}">
 
-                            <!-- Tags display (read-only chips) -->
+                            <!-- Tags display (read-only chips from config) -->
                             <div class="mb-3" th:unless="${#sets.isEmpty(entry.tags)}">
                                 <p class="definition-label mb-2">Tags</p>
                                 <span class="badge me-1"
@@ -175,9 +175,9 @@
                                 <div class="form-text">Max 1000 characters</div>
                             </div>
 
-                            <!-- Override warning (shown when a definition already exists) -->
+                            <!-- Override note (shown when a definition already exists) -->
                             <div class="roadmap-override-note mb-3" th:if="${entry.alreadySaved}">
-                                ⚠ A definition at this level already exists. Submitting will override it.
+                                ⚠ A definition for this chapter already exists. Submitting will override it.
                             </div>
 
                             <button class="btn btn-primary btn-sm" type="submit">
@@ -197,7 +197,7 @@
 
 <!--
   If an override warning is pending, scroll to and open the accordion
-  for the affected entry so the user can see the context.
+  for the affected term so the user can see the context.
 -->
 <script th:if="${pendingTermName}" th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function () {

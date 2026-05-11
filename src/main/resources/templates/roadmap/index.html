@@ -8,7 +8,7 @@
     <!-- Header -->
     <div class="page-header">
         <h1>Learning Roadmap</h1>
-        <p class="subtitle">A structured path through Java — one volume at a time. Work through each volume in order, define every term, and build your dictionary as you go.</p>
+        <p class="subtitle">A structured path through Java — one book at a time. Work through each volume in order, define every term, and build your dictionary as you go.</p>
     </div>
 
     <!-- Volume Grid -->
@@ -16,7 +16,12 @@
         <div class="col-12 col-md-6" th:each="volume : ${volumes}">
             <div class="roadmap-volume-card h-100">
 
-                <p class="definition-label mb-2" th:text="${volume.name}">Volume Name</p>
+                <p class="definition-label mb-1" th:text="${volume.name}">Volume Name</p>
+
+                <p class="text-muted mb-1" style="font-size: 0.8rem;"
+                   th:if="${volume.book}"
+                   th:text="${volume.book}">
+                </p>
 
                 <p class="text-muted mb-4" style="font-size: 0.9rem;" th:text="${volume.description}">Description</p>
 
@@ -26,7 +31,7 @@
                     </span>
                     <a class="roadmap-start-link"
                        th:href="@{/roadmap/{slug}(slug=${volume.slug})}">
-                        Start Volume →
+                        Open Book →
                     </a>
                 </div>
 
