@@ -1,8 +1,6 @@
 package com.noahparknguyen.javadictionary.dto.request;
 
-import com.noahparknguyen.javadictionary.model.ExperienceLevel;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,9 +25,6 @@ public class CreateTermRequest {
     @NotBlank(message = "Formal definition is required")
     @Size(max = 1000, message = "Formal definition must be under 1000 characters")
     private String formalDefinition;
-
-    @NotNull(message = "Experience level is required")
-    private ExperienceLevel experienceLevel;
 
     @Size(max = 10, message = "You can have at most 10 tags")
     private Set<@NotBlank String> tags = new HashSet<>();

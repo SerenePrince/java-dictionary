@@ -22,22 +22,24 @@
                     <input class="form-control"
                            id="search"
                            name="search"
-                           placeholder="Search terms and definitions..."
+                           placeholder="Search terms..."
                            th:value="${search}"
                            type="text">
                 </div>
 
-                <!-- Experience Level -->
+                <!-- Book Filter -->
                 <div class="col-12 col-md-3">
-                    <label class="form-label" for="experienceLevel">Level</label>
-                    <select class="form-select"
-                            id="experienceLevel"
-                            name="experienceLevel">
-                        <option value="">All Levels</option>
-                        <option th:each="level : ${experienceLevels}"
-                                th:selected="${level == selectedLevel}"
-                                th:text="${level.displayName}"
-                                th:value="${level}">
+                    <label class="form-label" for="book">Source</label>
+                    <select class="form-select" id="book" name="book">
+                        <option value="">All Sources</option>
+                        <option value="manual"
+                                th:selected="${selectedBook == 'manual'}">
+                            Manual
+                        </option>
+                        <option th:each="b : ${bookOptions}"
+                                th:selected="${b == selectedBook}"
+                                th:text="${b}"
+                                th:value="${b}">
                         </option>
                     </select>
                 </div>
@@ -63,62 +65,58 @@
     </div>
 
     <!-- Results Count -->
-    <p class="results-count" th:text="${#lists.size(terms)} + ' terms'">0 terms</p>
+    <p class="results-count" th:text="${#lists.size(groups)} + ' term' + (${#lists.size(groups)} != 1 ? 's' : '')">0 terms</p>
 
     <!-- Empty State -->
-    <div class="empty-state" th:if="${#lists.isEmpty(terms)}">
+    <div class="empty-state" th:if="${#lists.isEmpty(groups)}">
         <h5>No terms found.</h5>
         <p>Try adjusting your filters, or add a new term to get started.</p>
         <a class="btn btn-primary mt-3" th:href="@{/terms/create}">Add Term</a>
     </div>
 
-    <!-- Terms Grid -->
-    <div class="row g-3" th:unless="${#lists.isEmpty(terms)}">
-        <div class="col-12 col-md-6 col-lg-4" th:each="term : ${terms}">
+    <!-- Term Groups Grid -->
+    <div class="row g-3" th:unless="${#lists.isEmpty(groups)}">
+        <div class="col-12 col-md-6 col-lg-4" th:each="group : ${groups}">
             <div class="term-card h-100">
 
-                <!--
-                  If a level filter is active: show that level's definition in the card.
-                  If unfiltered: show the term name + all available level badges.
-                -->
+                <!-- Term name -->
+                <p class="term-name" th:text="${group.name}">Term Name</p>
 
-                <!-- Filtered view -->
-                <div th:if="${selectedLevel != null}"
-                     th:with="def=${term.definitions.get(selectedLevel)}">
-
-                    <div class="mb-2">
-                        <span class="badge" th:text="${selectedLevel.displayName}"></span>
-                    </div>
-
-                    <p class="term-name" th:text="${term.name}">Term Name</p>
-
-                    <p class="term-definition" th:text="${def?.casualDefinition}">Definition</p>
-
-                    <div class="mb-3" th:unless="${def == null or #sets.isEmpty(def.tags)}">
-                        <span class="badge me-1 mb-1"
-                              th:each="tag : ${def.tags}"
-                              th:text="${tag}">
-                        </span>
-                    </div>
+                <!-- Source badges (manual or per-entry source info) -->
+                <div class="mb-2" th:if="${#lists.size(group.entries) == 1}">
+                    <span class="badge"
+                          th:if="${group.entries[0].manual()}"
+                          th:text="'Manual'">
+                    </span>
+                    <span class="badge"
+                          th:unless="${group.entries[0].manual()}"
+                          th:text="${group.entries[0].sourceBook()}">
+                    </span>
                 </div>
 
-                <!-- Unfiltered view -->
-                <div th:unless="${selectedLevel != null}">
-
-                    <div class="mb-2">
-                        <span class="badge me-1"
-                              th:each="entry : ${term.definitions}"
-                              th:text="${entry.key.displayName}">
-                        </span>
-                    </div>
-
-                    <p class="term-name" th:text="${term.name}">Term Name</p>
-
+                <!-- Multiple sources indicator -->
+                <div class="mb-2" th:if="${#lists.size(group.entries) > 1}">
+                    <span class="badge" th:text="${#lists.size(group.entries)} + ' sources'"></span>
                 </div>
 
-                <!-- Link (always shown) -->
+                <!-- Casual definition preview (from first entry) -->
+                <p class="term-definition"
+                   th:text="${group.entries[0].casualDefinition()}">
+                    Definition preview
+                </p>
+
+                <!-- Tags (from first entry) -->
+                <div class="mb-3"
+                     th:unless="${#sets.isEmpty(group.entries[0].tags())}">
+                    <span class="badge me-1 mb-1"
+                          th:each="tag : ${group.entries[0].tags()}"
+                          th:text="${tag}">
+                    </span>
+                </div>
+
+                <!-- Link -->
                 <a class="term-link mt-auto"
-                   th:href="@{/terms/{id}(id=${term.id})}">
+                   th:href="@{/terms/{slug}(slug=${group.slug})}">
                     Read →
                 </a>
 

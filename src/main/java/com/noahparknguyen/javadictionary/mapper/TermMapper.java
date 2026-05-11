@@ -1,83 +1,95 @@
 package com.noahparknguyen.javadictionary.mapper;
 
 import com.noahparknguyen.javadictionary.dto.request.CreateTermRequest;
-import com.noahparknguyen.javadictionary.dto.request.UpdateTermRequest;
-import com.noahparknguyen.javadictionary.dto.response.TermDefinitionResponse;
+import com.noahparknguyen.javadictionary.dto.response.TermGroupView;
 import com.noahparknguyen.javadictionary.dto.response.TermResponse;
-import com.noahparknguyen.javadictionary.model.ExperienceLevel;
 import com.noahparknguyen.javadictionary.model.Term;
-import com.noahparknguyen.javadictionary.model.TermDefinition;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 public class TermMapper {
 
-    public TermResponse toResponse(Term term) {
-        Map<ExperienceLevel, TermDefinitionResponse> definitions = term.getDefinitions().entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> toDefinitionResponse(e.getValue())
-                ));
-        return new TermResponse(term.getId(), term.getName(), definitions);
-    }
+    // ── Entity → Response ─────────────────────────────────────────────────────
 
-    public TermDefinitionResponse toDefinitionResponse(TermDefinition def) {
-        return new TermDefinitionResponse(
-                def.getId(),
-                def.getExperienceLevel(),
-                def.getCasualDefinition(),
-                def.getFormalDefinition(),
-                def.getTags()
+    public TermResponse toResponse(Term term) {
+        return new TermResponse(
+                term.getId(),
+                term.getName(),
+                term.getSlug(),
+                term.getCasualDefinition(),
+                term.getFormalDefinition(),
+                term.getSourceBook(),
+                term.getSourceChapter(),
+                term.getTags(),
+                term.isManual()
         );
     }
 
     /**
-     * Creates a new Term with its first TermDefinition from a create request.
+     * Groups a flat list of Term entities by slug and builds a TermGroupView per group.
+     * Groups are returned in alphabetical slug order.
      */
+    public List<TermGroupView> toGroupViews(List<Term> terms) {
+        Map<String, List<Term>> bySlug = terms.stream()
+                .collect(Collectors.groupingBy(Term::getSlug));
+
+        return bySlug.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    List<Term> group = entry.getValue();
+                    String name = group.get(0).getName();
+                    List<TermResponse> entries = group.stream()
+                            .map(this::toResponse)
+                            .toList();
+                    return new TermGroupView(name, entry.getKey(), entries);
+                })
+                .toList();
+    }
+
+    public TermGroupView toGroupView(String slug, List<Term> terms) {
+        String name = terms.isEmpty() ? slug : terms.get(0).getName();
+        List<TermResponse> entries = terms.stream().map(this::toResponse).toList();
+        return new TermGroupView(name, slug, entries);
+    }
+
+    // ── Request → Entity ──────────────────────────────────────────────────────
+
     public Term toEntity(CreateTermRequest request) {
         Term term = new Term();
         term.setName(request.getName());
-
-        TermDefinition definition = buildDefinition(term, request.getExperienceLevel(),
-                request.getCasualDefinition(), request.getFormalDefinition(), request.getTags());
-        term.getDefinitions().put(request.getExperienceLevel(), definition);
-
+        term.setSlug(toSlug(request.getName()));
+        term.setCasualDefinition(request.getCasualDefinition());
+        term.setFormalDefinition(request.getFormalDefinition());
+        term.setTags(request.getTags() != null ? request.getTags() : new HashSet<>());
+        // sourceBook and sourceChapter remain null for manual terms
         return term;
     }
 
-    /**
-     * Upserts a definition on an existing Term at the level specified in the request.
-     * If a definition already exists at that level it is updated in place;
-     * if not, a new TermDefinition is created and added to the map.
-     */
-    public void upsertDefinition(Term term, UpdateTermRequest request) {
+    public void updateEntity(Term term, CreateTermRequest request) {
         term.setName(request.getName());
-
-        TermDefinition definition = term.getDefinitions().computeIfAbsent(
-                request.getExperienceLevel(),
-                level -> buildDefinition(term, level, null, null, null)
-        );
-
-        definition.setCasualDefinition(request.getCasualDefinition());
-        definition.setFormalDefinition(request.getFormalDefinition());
-        definition.setTags(request.getTags() != null ? request.getTags() : new HashSet<>());
+        term.setSlug(toSlug(request.getName()));
+        term.setCasualDefinition(request.getCasualDefinition());
+        term.setFormalDefinition(request.getFormalDefinition());
+        term.setTags(request.getTags() != null ? request.getTags() : new HashSet<>());
     }
 
-    // -------------------------------------------------------------------------
+    // ── Slug utility ──────────────────────────────────────────────────────────
 
-    private TermDefinition buildDefinition(Term term, ExperienceLevel level,
-                                           String casualDef, String formalDef,
-                                           java.util.Set<String> tags) {
-        TermDefinition def = new TermDefinition();
-        def.setTerm(term);
-        def.setExperienceLevel(level);
-        def.setCasualDefinition(casualDef);
-        def.setFormalDefinition(formalDef);
-        def.setTags(tags != null ? tags : new HashSet<>());
-        return def;
+    /**
+     * Converts a term name to a URL-safe slug.
+     * Examples:  "Garbage Collection" → "garbage-collection"
+     *            "JVM"               → "jvm"
+     *            "if-else"           → "if-else"
+     */
+    public static String toSlug(String name) {
+        return name.trim()
+                .toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-");
     }
 }

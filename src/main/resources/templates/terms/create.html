@@ -19,7 +19,7 @@
     <!-- Form -->
     <form method="post" th:action="@{/terms/create}" th:object="${createTermRequest}">
 
-        <div th:replace="~{fragments/term-form :: termFormFields(${experienceLevels}, ${createTermRequest.tags}, true)}"></div>
+        <div th:replace="~{fragments/term-form :: termFormFields(${createTermRequest.tags})}"></div>
 
         <!-- Actions -->
         <div class="d-flex gap-2 pt-2">

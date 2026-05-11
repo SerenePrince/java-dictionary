@@ -3,7 +3,6 @@ package com.noahparknguyen.javadictionary.dto.response;
 import com.noahparknguyen.javadictionary.config.roadmap.EntryConfig;
 import com.noahparknguyen.javadictionary.config.roadmap.HintConfig;
 import com.noahparknguyen.javadictionary.config.roadmap.ResourceConfig;
-import com.noahparknguyen.javadictionary.model.ExperienceLevel;
 
 import java.util.List;
 import java.util.Set;
@@ -18,9 +17,6 @@ public record RoadmapEntryView(
         /** The configured term name. */
         String term,
 
-        /** The experience level the user should write their definition at. */
-        ExperienceLevel experienceLevel,
-
         /** Pre-suggested tags from config. */
         Set<String> tags,
 
@@ -30,7 +26,7 @@ public record RoadmapEntryView(
         /** Research guidance prompts. */
         HintConfig hints,
 
-        /** True if a definition at this level already exists in the DB. */
+        /** True if a definition already exists in the DB for this (term, book, chapter). */
         boolean alreadySaved,
 
         /** DB term id, non-null only when alreadySaved == true. */
@@ -40,7 +36,6 @@ public record RoadmapEntryView(
     public static RoadmapEntryView of(EntryConfig config, boolean alreadySaved, Long existingTermId) {
         return new RoadmapEntryView(
                 config.getTerm(),
-                config.getExperienceLevel(),
                 config.getTags(),
                 config.getResources(),
                 config.getHints(),
